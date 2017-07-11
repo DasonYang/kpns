@@ -1,0 +1,5 @@
+core:
+  port: "8088"
+
+api:
+  push_uri: "/api/push"
