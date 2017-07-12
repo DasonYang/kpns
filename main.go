@@ -28,6 +28,8 @@ func main(){
 
     var err error
 
+    kpns.Configs = config.BuildDefaultConfig()
+
     if configFile != "" {
         kpns.Configs, err = config.LoadConfigYaml(configFile)
 
@@ -36,7 +38,9 @@ func main(){
 
             return
         }
-
-        fmt.Printf("%v\n", kpns.Configs.Core.Port)
     }
+
+    fmt.Printf("%v\n", kpns.Configs.Core.Port)
+
+    kpns.RunServer()
 }
