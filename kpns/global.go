@@ -6,4 +6,5 @@ import (
 
 var (
     Configs config.CfgYaml
+    QueueNotification chan PushNotification
 )
