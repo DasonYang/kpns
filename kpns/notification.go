@@ -88,6 +88,36 @@ func queueNotification(req PushRequest) int {
     return count
 }
 
+// InitAPNSClient use for initialize APNs Client.
+func InitAPNSClient() error {
+
+    var err error
+    ext := filepath.Ext(PushConf.Ios.KeyPath)
+
+    switch ext {
+    case ".p12":
+        CertificatePemIos, err = certificate.FromP12File(PushConf.Ios.KeyPath, PushConf.Ios.Password)
+    case ".pem":
+        CertificatePemIos, err = certificate.FromPemFile(PushConf.Ios.KeyPath, PushConf.Ios.Password)
+    default:
+        err = errors.New("wrong certificate key extension")
+    }
+
+    if err != nil {
+        LogError.Error("Cert Error:", err.Error())
+
+        return err
+    }
+
+    if PushConf.Ios.Production {
+        ApnsClient = apns.NewClient(CertificatePemIos).Production()
+    } else {
+        ApnsClient = apns.NewClient(CertificatePemIos).Development()
+    }
+
+    return nil
+}
+
 // queueNotification add notification to queue list.
 // func queueNotification(req RequestPush) (int, []LogPushEntry) {
 //     var count int

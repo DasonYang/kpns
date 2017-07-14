@@ -14,6 +14,7 @@ type CfgYaml struct {
 }
 
 type SectionCore struct {
+    Domain          string          `yaml:"domain"`
     Port            string          `yaml:"port"`
     WorkerNum       int64           `yaml:"worker_num"`
     QueueNum        int64           `yaml:"queue_num"`
@@ -32,6 +33,7 @@ func BuildDefaultConfig() CfgYaml {
     var conf CfgYaml
 
     // Core
+    conf.Core.Port = "localhost"
     conf.Core.Port = "7379"
     conf.Core.WorkerNum = int64(runtime.NumCPU())
     conf.Core.QueueNum = int64(8192)

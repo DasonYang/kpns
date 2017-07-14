@@ -5,6 +5,10 @@ import (
     "encoding/json"
     "fmt"
     "reflect"
+    "log"
+
+    "github.com/sideshow/apns2"
+    "github.com/sideshow/apns2/certificate"
 )
 
 type TestStruct struct {
@@ -51,5 +55,33 @@ func TestUnmarshal(t *testing.T) {
         fmt.Printf("Error = %v\n", err)
     }
     fmt.Printf("name = %v, id = %v\n", req.Name, req.Id)
+
+}
+
+func TestPushIos(t *testing.T) {
+    cert, err := certificate.FromPemFile("./ios.pem", "")
+    if err != nil {
+        log.Fatal("Cert Error:", err)
+    }
+
+    notification := &apns2.Notification{}
+    notification.DeviceToken = "991094614d098364a30f4ea448e17ae39f16013866ebcf18af4b6a540fa36009"
+    notification.Topic = "com.tutk.p2pcamlive.2"
+    notification.Payload = []byte(`{"aps":{"alert":"Hello!"}}`) // See Payload section below
+
+    client := apns2.NewClient(cert).Production()
+    res, err := client.Push(notification)
+
+    if err != nil {
+        log.Fatal("Error:", err)
+    }
+
+    fmt.Printf("%v %v %v\n", res.StatusCode, res.ApnsID, res.Reason)
+
+    if res.Sent() {
+        log.Println("Sent:", res.ApnsID)
+    } else {
+        fmt.Printf("Not Sent: %v %v %v\n", res.StatusCode, res.ApnsID, res.Reason)
+    }
 
 }

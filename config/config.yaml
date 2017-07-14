@@ -1,4 +1,5 @@
 core:
+  domain: "push.kalay.us"
   port: "8088"
 
 api:
