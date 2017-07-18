@@ -2,7 +2,14 @@ package kpns
 
 import (
     "fmt"
+    "log"
+    // "reflect"
+    "encoding/json"
+
+
     "github.com/gin-gonic/gin"
+    "gopkg.in/mgo.v2"
+    //"gopkg.in/mgo.v2/bson"
 )
 
 func pushHandler(c *gin.Context) {
@@ -48,6 +55,44 @@ func pushHandlerGET(c *gin.Context) {
     query := c.Request.URL.Query()
 
     cmd := query["cmd"][0]
+    log.Printf("query = %v\n", query)
+    delete(query, "cmd")
+
+    client := make(map[string]interface{})
+    client["key"] = "1029384756"
+    values := make(map[string]interface{})
+
+    for k, v := range query{
+       values[k] = v[0]
+    }
+    client["value"] = values
+    fmt.Printf("client = %v\n", client)
+
+    jsonString, err := json.Marshal(query)
+
+    if err != nil {
+        panic(err)
+    }
+
+    log.Printf("json string = ", jsonString)
+
+    var dat map[string]interface{}
+
+    err = json.Unmarshal(jsonString, &dat)
+
+    log.Printf("dat = ", dat)
+
+    session, err := mgo.Dial("localhost")
+
+    if err != nil {
+        panic(err)
+    }
+
+    defer session.Close()
+
+    session.SetMode(mgo.Monotonic, true)
+
+    
 
     switch cmd{
     case "hello":
@@ -67,6 +112,14 @@ func pushHandlerGET(c *gin.Context) {
     case "client":
         fallthrough
     case "reg_client":
+        // collection := session.DB("test").C("client")
+        // err = collection.Insert(client)
+        // if err != nil {
+        //     panic(err)
+        // }
+        //log.Printf("udid : %v, appid : %v, os : %v\n", query["udid"][0], query["appid"][0], query["os"][0])
+        key := GetClientKey(query["udid"][0], query["appid"][0], query["os"][0])
+        log.Printf("Get key : %v\n", key)
         c.String(200, "Client")
     default:
         c.String(200, "Error")
