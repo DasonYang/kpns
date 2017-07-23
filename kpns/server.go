@@ -4,6 +4,7 @@ import (
     "fmt"
     "log"
     // "reflect"
+    "kpns/utils"
     "encoding/json"
 
 
@@ -117,8 +118,8 @@ func pushHandlerGET(c *gin.Context) {
         // if err != nil {
         //     panic(err)
         // }
-        //log.Printf("udid : %v, appid : %v, os : %v\n", query["udid"][0], query["appid"][0], query["os"][0])
-        key := GetClientKey(query["udid"][0], query["appid"][0], query["os"][0])
+        log.Printf("udid : %v, appid : %v, os : %v\n", query["udid"][0], query["appid"][0], query["os"][0])
+        key := utils.Sum128toString(query["udid"][0], query["appid"][0], query["os"][0])
         log.Printf("Get key : %v\n", key)
         c.String(200, "Client")
     default:
