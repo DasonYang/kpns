@@ -12,10 +12,10 @@ type ClientData struct {
     Value   map[string]interface{}      `json:"value"`
 }
 
-type DatabaseWrapper interface {
+type DatabaseClient interface {
     Init() error
     Write() error
-    Read()
+    Read()  map[string]interface{}
     Update()
     Delete() error
 }

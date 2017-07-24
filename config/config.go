@@ -11,6 +11,7 @@ import (
 type CfgYaml struct {
     Core SectionCore `yaml:"core"`
     API SectionAPI `yaml:"api"`
+    DB  SectionDB   `yaml:"db"`
 }
 
 type SectionCore struct {
@@ -22,6 +23,12 @@ type SectionCore struct {
 
 type SectionAPI struct {
     PushURI string `yaml:"push_uri"`
+}
+
+type SectionDB struct {
+    Domain          string          `yaml:"domain"`
+    Port            string          `yaml:"port"`
+    Name            string          `yaml:"name"`
 }
 
 func Echo() {
