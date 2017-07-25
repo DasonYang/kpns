@@ -8,12 +8,6 @@ import (
     "gopkg.in/mgo.v2/bson"
 )
 
-type DatabaseClient struct {
-    Database    string
-    Collection  string
-    Session     *mgo.Session
-}
-
 func New() *DatabaseClient {
     session, err := mgo.Dial("localhost")
 
@@ -26,10 +20,14 @@ func New() *DatabaseClient {
     return &DatabaseClient{Session : session}
 }
 
-func (db *DatabaseClient) Read() map[string]interface{} {
+type DatabaseClient struct {
+    Session     *mgo.Session
+}
+
+func (client *DatabaseClient) Read(db string, collection string) map[string]interface{} {
     var result map[string]interface{}
 
-    c := db.Session.DB(db.Database).C(db.Collection)
+    c := client.Session.DB(db).C(collection)
 
     err := c.Find(bson.M{"name": "Ale"}).One(&result)
     if err != nil {
@@ -37,4 +35,8 @@ func (db *DatabaseClient) Read() map[string]interface{} {
     }
 
     return result
+}
+
+func (client *DatabaseClient) Write(db string, collection string, data map[string]interface{}) error {
+    return nil
 }

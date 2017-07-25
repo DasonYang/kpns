@@ -5,6 +5,8 @@ import (
     "log"
     // "reflect"
     "kpns/utils"
+    "kpns/database"
+    "kpns/database/mongo"
     "encoding/json"
 
 
@@ -98,6 +100,12 @@ func pushHandlerGET(c *gin.Context) {
     switch cmd{
     case "hello":
         c.String(200, "Hi")
+        var db database.DatabaseClient
+        db = mongo.New()
+
+        result := db.Read("test", "people")
+
+        log.Println("Phone:", result)
     case "event":
         fallthrough
     case "raise_event":

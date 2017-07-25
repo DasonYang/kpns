@@ -8,6 +8,7 @@ import (
 
     "kpns/config"
     "kpns/kpns"
+    // "kpns/database"
 )
 
 var Version = "No Version Provided"
@@ -41,6 +42,8 @@ func main(){
     }
 
     fmt.Printf("%v\n", kpns.Configs.Core.Port)
+
+    // kpns.DBClient = database.NewDB(kpns.Configs)
 
     kpns.RunServer()
 }

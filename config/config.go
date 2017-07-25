@@ -19,6 +19,7 @@ type SectionCore struct {
     Port            string          `yaml:"port"`
     WorkerNum       int64           `yaml:"worker_num"`
     QueueNum        int64           `yaml:"queue_num"`
+    Database        string          `yaml:"database"`
 }
 
 type SectionAPI struct {
