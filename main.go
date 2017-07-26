@@ -8,7 +8,7 @@ import (
 
     "kpns/config"
     "kpns/kpns"
-    // "kpns/database"
+    "kpns/database"
 )
 
 var Version = "No Version Provided"
@@ -19,8 +19,10 @@ func main(){
     //opts := config.CfgYaml{}
 
     var configFile string
+    var runServer  bool
 
     flag.StringVar(&configFile, "c", "", "Configuration File Path")
+    flag.BoolVar(&runServer, "d", false, "Run Kpns Server")
     flag.Parse()
 
     config.Echo()
@@ -43,7 +45,8 @@ func main(){
 
     fmt.Printf("%v\n", kpns.Configs.Core.Port)
 
-    // kpns.DBClient = database.NewDB(kpns.Configs)
-
-    kpns.RunServer()
+    kpns.DBClient = database.NewDB(kpns.Configs)
+    if runServer {
+        kpns.RunServer()
+    }
 }
