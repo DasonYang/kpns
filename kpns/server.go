@@ -1,112 +1,29 @@
 package kpns
 
 import (
-    "fmt"
-    "log"
-    // "reflect"
-    "kpns/utils"
-    // "kpns/database"
-    // "kpns/database/mongo"
-    "encoding/json"
-
-
     "github.com/gin-gonic/gin"
-    "gopkg.in/mgo.v2"
-    //"gopkg.in/mgo.v2/bson"
+
+    log "github.com/sirupsen/logrus"
 )
 
-func pushHandler(c *gin.Context) {
-    fmt.Printf("Push Handler")
-    var data PushRequest
-    var msg string
-
-    if err := c.BindJSON(&data); err != nil {
-        msg = "Missing notifications field."
-        // LogAccess.Debug(msg)
-        // abortWithError(c, http.StatusBadRequest, msg)
-        return
-    }
-
-    if len(data.Notifications) == 0 {
-        msg = "Notifications field is empty."
-        // LogAccess.Debug(msg)
-        // abortWithError(c, http.StatusBadRequest, msg)
-        return
-    }
-
-    for _, notification := range data.Notifications {
-        fmt.Printf("notification = %v, tokens = %v, platform = %v, msg = %v\n", notification, notification.Tokens, notification.Platform, msg)
-    }
-
-    // if int64(len(form.Notifications)) > PushConf.Core.MaxNotification {
-    //     msg = fmt.Sprintf("Number of notifications(%d) over limit(%d)", len(form.Notifications), PushConf.Core.MaxNotification)
-    //     LogAccess.Debug(msg)
-    //     abortWithError(c, http.StatusBadRequest, msg)
-    //     return
-    // }
-
-    // counts, logs := queueNotification(form)
-
-    // c.JSON(http.StatusOK, gin.H{
-    //     "success": "ok",
-    //     "counts":  counts,
-    //     "logs":    logs,
-    // })
-}
-
-func pushHandlerGET(c *gin.Context) {
+func kpnsGETHandler(c *gin.Context) {
     query := c.Request.URL.Query()
 
     cmd := query["cmd"][0]
-    log.Printf("query = %v\n", query)
+    log.WithFields(log.Fields{"query" : query}).Info()
     delete(query, "cmd")
 
-    client := make(map[string]interface{})
-    client["key"] = "1029384756"
-    values := make(map[string]interface{})
+    data := make(map[string]interface{})
 
     for k, v := range query{
-       values[k] = v[0]
-    }
-    client["value"] = values
-    fmt.Printf("client = %v\n", client)
-
-    jsonString, err := json.Marshal(query)
-
-    if err != nil {
-        panic(err)
+       data[k] = v[0]
     }
 
-    log.Printf("json string = ", jsonString)
-
-    var dat map[string]interface{}
-
-    err = json.Unmarshal(jsonString, &dat)
-
-    log.Printf("dat = ", dat)
-
-    session, err := mgo.Dial("localhost")
-
-    if err != nil {
-        panic(err)
-    }
-
-    defer session.Close()
-
-    session.SetMode(mgo.Monotonic, true)
-
-    
+    log.Printf("data = %v\n", data)
 
     switch cmd{
     case "hello":
         c.String(200, "Hi")
-        // var db database.DatabaseClient
-        // db = mongo.New()
-
-        // result := db.Read("test", "people")
-        result := DBClient.Read("test", "people")
-
-        log.Println("Phone:", result)
     case "event":
         fallthrough
     case "raise_event":
@@ -122,19 +39,22 @@ func pushHandlerGET(c *gin.Context) {
     case "client":
         fallthrough
     case "reg_client":
-        // collection := session.DB("test").C("client")
-        // err = collection.Insert(client)
-        // if err != nil {
-        //     panic(err)
-        // }
-        log.Printf("udid : %v, appid : %v, os : %v\n", query["udid"][0], query["appid"][0], query["os"][0])
-        key := utils.Sum128toString(query["udid"][0], query["appid"][0], query["os"][0])
-        log.Printf("Get key : %v\n", key)
-        c.String(200, "Client")
+        err := ClientDo(data)
+
+        if err != nil {
+            panic(err)
+        } else {
+            c.String(200, "Success")
+        }
+    case "device":
+        fallthrough
+    case "reg_server":
+        result := DeviceDo(data)
+
+        c.String(200, result.Code+ " " +result.Msg)
     default:
         c.String(200, "Error")
     }
-    
 }
 
 func RunServer() {
@@ -145,7 +65,7 @@ func RunServer() {
         })
     })
 
-    r.POST("/api/push", pushHandler)
-    r.GET("/tpns", pushHandlerGET)
+    // r.POST("/api/push", pushHandler)
+    r.GET("/tpns", kpnsGETHandler)
     r.Run("localhost:8080") // listen and serve on 0.0.0.0:8080
 }

@@ -21,7 +21,7 @@ func Sum128toString(udid string, appid string, platform string) string {
     buffer.WriteString(udid)
     buffer.WriteString(appid)
     buffer.WriteString(platform)
-    var key string = "Not implemented yet"
+    var key string = "##"
     var v []uint64
 
     h1, h2 := murmur3.Sum128(buffer.Bytes())
@@ -141,10 +141,10 @@ func Sum128toString(udid string, appid string, platform string) string {
             strlen++
         }
 
-        p = make([]byte, strlen)
-        pos := strlen-1
-        p[pos] = 0x00
-        pos--
+        p = make([]byte, strlen-1)
+        pos := strlen-2
+        // p[pos] = 0x00
+        // pos--
 
         for i=0; i < size - 1; i++ {
             rem = uint32(pout[i])
