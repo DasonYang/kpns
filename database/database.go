@@ -16,7 +16,8 @@ type ClientData struct {
 
 type DatabaseClient interface {
     Write(string, string, map[string]interface{}) error
-    Read(string, string, map[string]interface{})  map[string]interface{}
+    ReadAll(string, string, map[string]interface{})  []map[string]interface{}
+    ReadOne(string,string,map[string]interface{})   map[string]interface{}
 }
 
 func NewDB(cfg config.CfgYaml) DatabaseClient {

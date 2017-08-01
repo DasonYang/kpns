@@ -40,7 +40,7 @@ func DeviceDo(data map[string]interface{}) KPNSResult {
         
         query := make(map[string]interface{})
         query["key"] = uid
-        ret := DBClient.Read("tpns", "device", query)
+        ret := DBClient.ReadOne("tpns", "device", query)
 
         value := utils.ConvertInterfaceToMap(ret["value"])
 

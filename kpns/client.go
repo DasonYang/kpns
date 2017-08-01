@@ -45,7 +45,7 @@ func ClientDo(data map[string]interface{}) error {
 
         query := make(map[string]interface{})
         query["key"] = key
-        ret := DBClient.Read("tpns", "client", query)
+        ret := DBClient.ReadOne("tpns", "client", query)
 
         value := utils.ConvertInterfaceToMap(ret["value"])
         // log.Printf("value = %v\n", value)

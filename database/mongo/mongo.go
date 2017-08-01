@@ -25,12 +25,40 @@ type DatabaseClient struct {
     Session     *mgo.Session
 }
 
-func (client *DatabaseClient) Read(db string, collection string, query map[string]interface{}) map[string]interface{} {
+func (client *DatabaseClient) ReadOne(db string, collection string, query map[string]interface{}) map[string]interface{} {
     var result map[string]interface{}
 
     c := client.Session.DB(db).C(collection)
 
     err := c.Find(query).One(&result)
+    if err != nil {
+        log.Println(err)
+    }
+
+    return result
+}
+
+func (client *DatabaseClient) ReadAll(db string, collection string, query map[string]interface{}) []map[string]interface{} {
+    var result []map[string]interface{}
+
+    c := client.Session.DB(db).C(collection)
+
+    q := c.Find(nil)
+
+    if s, ok := query["skip"]; ok {
+        q = q.Skip(s.(int))
+    }
+
+    if l, ok := query["limit"]; ok {
+        q = q.Limit(l.(int))
+    }
+
+    if s, ok := query["sort"]; ok {
+        sort := fmt.Sprintf("%v", s)
+        q = q.Sort(sort)
+    } 
+
+    err := q.All(&result)
     if err != nil {
         log.Println(err)
     }

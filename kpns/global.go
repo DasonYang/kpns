@@ -1,7 +1,9 @@
 package kpns
 
 import (
+    "os"
     "fmt"
+    "path/filepath"
     "kpns/config"
     "kpns/database"
 
@@ -36,13 +38,21 @@ var (
     QueueNotification chan PushNotification
     DBClient    database.DatabaseClient
     ErrorCode   string = fmt.Sprintf("E%03d", 0)
+    TemplatePath string = getTemplatePath()
 )
+
+func getTemplatePath() string {
+    fmt.Println("getTemplatePath")
+    path, _ := os.Getwd()
+    return filepath.Join(path, "kpns/templates")
+}
+
 
 func UIDVerify(uid string) (map[string]interface{}, error) {
     log.WithFields(log.Fields {
         "uid": uid,
     }).Info("UIDVerify")
-    data := DBClient.Read("tpns", "allow", map[string]interface{}{"key":uid})
+    data := DBClient.ReadOne("tpns", "allow", map[string]interface{}{"key":uid})
 
     log.WithFields(log.Fields {
         "data": data,

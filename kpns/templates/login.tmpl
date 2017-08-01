@@ -1,0 +1,39 @@
+<html>
+<head ><!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="shortcut icon" href="/static/favicon.ico">
+
+</head>
+<body>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <center ><h2 >Login</h2></center>
+    <br/>
+    <br/>
+    {{ if .Error }}
+    <center><div class="alert alert-danger">{{.Message}}</div></center>
+    {{end}}
+    <form method="post" enctype="multipart/form-data" class="form-horizontal" role="form">
+        <div class="form-group">
+            <div class="col-md-4"></div>
+            <label for="inputUser" class="navbar-brand col-md-1 control-label">User</label>
+            <div class="col-md-2">
+                <input type="text" name="user" value="" id="inputUser" placeholder="<User>@<Mail.Address>" class="form-control"></input>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-4"></div>
+            <label for="inputPassword" class="navbar-brand col-md-1 control-label">Password</label>
+            <div class="col-md-2">
+                <input type="password" name="pswd" value="" id="inputPassword" placeholder="" class="form-control"></input>
+            </div>
+            <input type="hidden" name="active" value="" id="" ></input>
+            <div class="col-md-1">
+                <button class="btn btn-primary" onclick="document.getElementById('inputPassword').value=window.btoa(unescape(encodeURIComponent(document.getElementById('inputPassword').value)));">Okiedokie</button>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
