@@ -183,7 +183,7 @@ func Mmh3py(data string) string {
 
     b := append(b1, b2...)
 
-    log.Printf("b = %v\n", string(b))
+    // log.Printf("b = %v\n", string(b))
 
     var pstartbyte []byte = b
     var pendbyte []byte = b[15:]        /* 16-1 */
@@ -191,14 +191,14 @@ func Mmh3py(data string) string {
     var ndigits int;                    /* number of Python long digits */
     var idigit int = 0;                 /* next free index in v->ob_digit */
 
-    log.Printf("pstartbyte = %v, pendbyte = %v\n", string(pstartbyte), string(pendbyte))
+    // log.Printf("pstartbyte = %v, pendbyte = %v\n", string(pstartbyte), string(pendbyte))
 
     var is_signed = pendbyte[0] >= 0x80
-    log.Printf("is_signed = %v\n", is_signed)
+    // log.Printf("is_signed = %v\n", is_signed)
     {
         var p []byte = pendbyte
         var i int
-        var pincr int = -1
+        // var pincr int = -1
         var insignficant byte
         if is_signed {
             insignficant = 0xff
@@ -206,10 +206,10 @@ func Mmh3py(data string) string {
             insignficant = 0x00
         }
 
-        log.Printf("p = %v, i = %v, pincr = %v, insignficant = %v\n", p, i, pincr, insignficant)
+        // log.Printf("p = %v, i = %v, pincr = %v, insignficant = %v\n", p, i, pincr, insignficant)
 
         for i := 0; i < 16; i++  {
-            log.Printf("i = %v\n", i)
+            // log.Printf("i = %v\n", i)
             if p[i] != insignficant {
                 break
             }
@@ -226,7 +226,7 @@ func Mmh3py(data string) string {
     }
     ndigits = (numsignificantbytes * 8 + 30 - 1) / 30
     v = make([]uint64, ndigits)
-    log.Printf("ndigits = %v, numsignificantbytes = %v\n", ndigits, numsignificantbytes)
+    // log.Printf("ndigits = %v, numsignificantbytes = %v\n", ndigits, numsignificantbytes)
 
     {
         var i int;
@@ -234,7 +234,7 @@ func Mmh3py(data string) string {
         var accum uint64 = 0                    /* sliding register */
         var accumbits uint = 0             /* number of bits in accum */
         var p []byte = pstartbyte
-        log.Printf("pstartbyte = %v\n", pstartbyte)
+        // log.Printf("pstartbyte = %v\n", pstartbyte)
         for i = 0; i < numsignificantbytes; i++ {
             var thisbyte uint64 = uint64(p[i])
             // printf("%" PRIu64 "\n", thisbyte);
@@ -264,38 +264,39 @@ func Mmh3py(data string) string {
         }
     }
 
-    for idx := 0; idx < idigit; idx++ {
-        log.Printf("v[%v] = %v\n", idx, v[idx])
-    }
+    // for idx := 0; idx < idigit; idx++ {
+    //     log.Printf("v[%v] = %v\n", idx, v[idx])
+    // }
 
     {
         var size, strlen, size_a, i, j int
         var rem, tenpow uint32
-        var pin, pout []uint64
+        // var pin []uint64
+        var pout []uint64
         var scratch []uint64 = make([]uint64, ndigits)
         var p []byte
         var negative int = 0
         var addL int = 1
 
-        pin = v
+        // pin = v
         pout = scratch
-        for idx := 0; idx < idigit; idx++ {
-            log.Printf("v[%v] = %v\n", idx, pin[idx])
-        }
+        // for idx := 0; idx < idigit; idx++ {
+        //     log.Printf("v[%v] = %v\n", idx, pin[idx])
+        // }
         size = 0
         size_a = ndigits
         
         for i = size_a-1; i >= 0; i-- {
 
             var hi uint32 = uint32(v[i])
-            log.Printf("Line = 147, i = %v, hi = %v\n", i, hi)
+            // log.Printf("Line = 147, i = %v, hi = %v\n", i, hi)
             for j := 0; j < size; j++ {
                 var z uint64 = uint64(pout[j]) << LongShift | uint64(hi)
-                log.Printf("\nLine = 150, z = %v\n", z)
+                // log.Printf("\nLine = 150, z = %v\n", z)
                 hi = uint32(z / uint64(LongDecimalBase))
-                log.Printf("Line = 152, hi = %v\n", hi)
+                // log.Printf("Line = 152, hi = %v\n", hi)
                 pout[j] = uint64(uint32(z) - (hi * LongDecimalBase))
-                log.Printf("Line = 154, pout[%v] = %v\n", j,pout[j])
+                // log.Printf("Line = 154, pout[%v] = %v\n", j,pout[j])
             }
             // printf("Line = 233, i = %d, result = %d\n", i, --i >= 0);
             // sleep(1);
@@ -312,7 +313,7 @@ func Mmh3py(data string) string {
             pout[size] = 0
             size++
         }
-        log.Printf("Line = 237, pout = %v\n", pout)
+        // log.Printf("Line = 237, pout = %v\n", pout)
         /* calculate exact length of output string, and allocate */
         strlen = addL + negative + 1 + (size - 1) * LongDecimalShift
         tenpow = 10
@@ -323,15 +324,17 @@ func Mmh3py(data string) string {
         }
 
         /* fill the string right-to-left */
-        p = make([]byte, strlen+1)
-        pos := strlen
-        p[pos] = 0x00
-        pos--
-        if (addL > 0) {
-            p[pos] = 0x4C
-            pos--
-        }
-        log.Printf("Line = 266, p = %v, pos = %v\n", string(p), pos)
+        p = make([]byte, strlen-1)
+        pos := strlen-2
+        // p = make([]byte, strlen+1)
+        // pos := strlen
+        // p[pos] = 0x00
+        // pos--
+        // if (addL > 0) {
+        //     p[pos] = 0x4C
+        //     pos--
+        // }
+        // log.Printf("Line = 266, p = %v, pos = %v\n", string(p), pos)
         /* pout[0] through pout[size-2] contribute exactly
            LongDecimalShift digits each */
         for i=0; i < size - 1; i++ {
@@ -350,7 +353,7 @@ func Mmh3py(data string) string {
             rem /= 10
         }
 
-        log.Printf("p = %v\n", string(p))
+        // log.Printf("p = %v\n", string(p))
         return string(p)
     }
 

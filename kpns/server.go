@@ -7,6 +7,8 @@ import (
     "fmt"
     "net/http"
     "encoding/json" 
+
+    "kpns/web"
 )
 
 // func kpnsGETHandler(c *gin.Context) {
@@ -153,9 +155,15 @@ func kpnsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RunServer() {
+    err := web.Init(DBClient)
+
+    if err != nil {
+        panic(err)
+    }
+
     http.HandleFunc("/tpns", kpnsHandler)
-    http.HandleFunc("/login", LoginHandler)
-    http.HandleFunc("/allow", AllowHandler)
+    http.HandleFunc("/login", web.LoginHandler)
+    http.Handle("/allow", web.AuthMiddleware(http.HandlerFunc(web.AllowHandler)))
 
     http.ListenAndServe(":8080", nil)
 }
