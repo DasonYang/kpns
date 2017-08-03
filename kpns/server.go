@@ -162,7 +162,7 @@ func RunServer() {
     }
 
     http.HandleFunc("/tpns", kpnsHandler)
-    http.HandleFunc("/login", web.LoginHandler)
+    http.Handle("/login", web.AuthMiddleware(http.HandlerFunc(web.LoginHandler)))
     http.Handle("/allow", web.AuthMiddleware(http.HandlerFunc(web.AllowHandler)))
 
     http.ListenAndServe(":8080", nil)
