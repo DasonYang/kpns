@@ -1,7 +1,7 @@
 package web
 
 import(
-    // "fmt"
+    "fmt"
     "net/http"
 )
 
@@ -26,6 +26,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
         if user == "" || token == "" {
             // Not login or expired
             http.Redirect(w, r, "/login", http.StatusSeeOther)
+            return
         } else {
             // Auth verified
             ret := dbClient.ReadOne("tpns", "account", map[string]interface{}{"key":user})
@@ -39,12 +40,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
                         http.SetCookie(w, &http.Cookie{Name: "user", Value: ""})
                         http.SetCookie(w, &http.Cookie{Name: "msg", Value: "You already login in other device."})
                         http.Redirect(w, r, "/login", http.StatusSeeOther)
+                        return
                     }
                 }
 
             }
         }
-
+        fmt.Println("Execute ServeHTTP")
         next.ServeHTTP(w, r)
     })
 }

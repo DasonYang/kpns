@@ -79,8 +79,9 @@ func checkAccount(username, password string) (string, string) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-    // fmt.Fprintln(w, "200 Success"+" "+r.URL.Path[1:])
+    fmt.Println("================================Login=================================")
     if r.Method == "GET" {
+        fmt.Println("================================Login.GET=================================")
         // info := make(map[string]interface{})
         // msg :=  r.Cookie("msg")
 
@@ -97,6 +98,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         }
         t.Execute(w, nil)
     } else {
+        fmt.Println("================================Login.POST=================================")
         r.ParseMultipartForm(0)
         // logic part of log in
         username := r.PostForm["user"][0]

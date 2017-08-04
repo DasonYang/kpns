@@ -17,10 +17,10 @@ type AllowData struct {
 func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
     // username, password, ok := r.BasicAuth()
-    // fmt.Printf("username = %v, passowrd = %v, ok = %v\n", username, password, ok)
+    fmt.Println("================================Allow=================================")
 
     if r.Method == "GET" {
-
+        fmt.Println("================================Allow.GET=================================")
         var params = make(map[string]interface{})
         var allowList []AllowData
         params["skip"] = 0
@@ -64,6 +64,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         input["Data"] = allowList
         t.Execute(w, input)
     } else {
+        fmt.Println("================================Allow.POST=================================")
         r.ParseMultipartForm(0)
         // logic part of log in
     }
