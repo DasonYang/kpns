@@ -130,7 +130,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             // Login success
 
             expiration := time.Now()
-            expiration = expiration.Add(time.Minute * time.Duration(1))
+            expiration = expiration.Add(time.Hour * time.Duration(1))
             fmt.Printf("expiration = %v, token = %v, mode = %v\n", expiration, token, mode)
             // cookie := http.Cookie{Name: "token", Value: token, Expires: expiration}
             http.SetCookie(w, &http.Cookie{Name: "token", Value: token, Expires: expiration})

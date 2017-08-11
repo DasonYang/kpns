@@ -3,6 +3,8 @@ package web
 import (
     "fmt"
     "time"
+    // "reflect"
+    "strconv"
     "net/http"
     "html/template"
 )
@@ -23,10 +25,34 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Println("================================Allow.GET=================================")
         var params = make(map[string]interface{})
         var allowList []AllowData
-        params["skip"] = 0
-        params["limit"] = 20
+        var pageIdx, limit int
 
-        query := dbClient.ReadAll("tpns", "allow", params)
+        count := dbClient.Count("tpns", "allow", nil)
+        
+        for key, value := range r.URL.Query() {
+            fmt.Printf("key = %v, value = %v\n", key, value)
+            switch key {
+            case "page":
+                pageIdx, _ = strconv.Atoi(value[0])
+            case "limit":
+                limit, _ = strconv.Atoi(value[0])
+            }
+        }
+
+        if limit < 20 {
+            limit = 20
+        }
+
+        if pageIdx == 0 {
+            pageIdx = 1
+        }
+        
+
+        fmt.Printf("pageidx = %v, limit = %v\n", pageIdx, limit)
+        params["skip"] = (pageIdx-1)*limit
+        params["limit"] = limit
+
+        query := dbClient.ReadAll("tpns", "allow", nil, params)
 
         fmt.Printf("count = %v\n", len(query))
 
@@ -62,6 +88,10 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         }
         var input = make(map[string]interface{})
         input["Data"] = allowList
+        input["Page"] = pageIdx
+        input["Count"] = count
+        input["Limit"] = limit
+
         t.Execute(w, input)
     } else {
         fmt.Println("================================Allow.POST=================================")

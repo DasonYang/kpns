@@ -38,22 +38,22 @@ func (client *DatabaseClient) ReadOne(db string, collection string, query map[st
     return result
 }
 
-func (client *DatabaseClient) ReadAll(db string, collection string, query map[string]interface{}) []map[string]interface{} {
+func (client *DatabaseClient) ReadAll(db string, collection string, query map[string]interface{}, condition map[string]interface{}) []map[string]interface{} {
     var result []map[string]interface{}
 
     c := client.Session.DB(db).C(collection)
 
-    q := c.Find(nil)
+    q := c.Find(query)
 
-    if s, ok := query["skip"]; ok {
+    if s, ok := condition["skip"]; ok {
         q = q.Skip(s.(int))
     }
 
-    if l, ok := query["limit"]; ok {
+    if l, ok := condition["limit"]; ok {
         q = q.Limit(l.(int))
     }
 
-    if s, ok := query["sort"]; ok {
+    if s, ok := condition["sort"]; ok {
         sort := fmt.Sprintf("%v", s)
         q = q.Sort(sort)
     } 
@@ -85,4 +85,15 @@ func (client *DatabaseClient) Write(db string, collection string, data map[strin
     log.Printf("key = %v, updated = %v, removed = %v, upsertedId = %v\n", key, info.Updated, info.Removed, info.UpsertedId)
 
     return err
+}
+
+func(client *DatabaseClient) Count(db string, collection string, query map[string]interface{}) int {
+    c := client.Session.DB(db).C(collection)
+
+    count, err := c.Find(query).Count()
+    if err != nil {
+        log.Println(err)
+    }
+
+    return count
 }
