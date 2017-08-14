@@ -92,6 +92,15 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         input["Count"] = count
         input["Limit"] = limit
 
+        if pageIdx > 1 {
+            input["HasPre"] = true
+            input["Pre"] = pageIdx-1
+        }
+        if (pageIdx * limit) < count {
+            input["HasNext"] = true
+            input["Next"] = pageIdx + 1
+        }
+
         t.Execute(w, input)
     } else {
         fmt.Println("================================Allow.POST=================================")

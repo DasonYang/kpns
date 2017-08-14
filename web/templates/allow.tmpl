@@ -106,11 +106,10 @@
             {{ end }}
             </tr>
         </table>
-        <!-- <center >
-            {{ if .Page gt 1 }}<a href="?page={{subtract .Page}}&limit={{.Limit}}">&lt;&lt;</a>{{ end }}
-
-            {{ if (mul .Page .Limit) lt .Count }}<a href="?page={{subtract .Page}}&limit={{.Limit}}">Next Page &gt;&gt;</a>{{ end }}
-        </center> -->
+        <center >
+            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}">&lt;&lt;</a>{{ end }}
+            {{ if .HasNext }}<a href="?page={{.Next}&limit={{.Limit}}">Next Page &gt;&gt;</a>{{ end }}
+        </center>
             
     </body>
 </html>
