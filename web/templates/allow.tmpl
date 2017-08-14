@@ -65,10 +65,10 @@
                     <input type="text" name="mode" value="" id="" class="form-control" placeholder=""></input>
                 </div>
                 <div class="col-md-2">
-                    <input type="text" name="ltime" value="yy:0,mm:0,dd:1" id="" class="form-control" placeholder=""></input>
+                    <input type="text" name="ltime" value="" id="" class="form-control" placeholder="yyyy/mm/dd"></input>
                 </div>
                 <div class="col-md-2">
-                    <input type="text" name="note" value="" id="" class="form-control" placeholder=""></input>
+                    <input type="text" name="note" value="{{if .HasNote}}{{.Note}}{{end}}" id="" class="form-control" placeholder=""></input>
                 </div>
                 <center >
                     <div class="col-md-1">
@@ -87,7 +87,7 @@
         </form>
         <table class="table table-striped" style="table-layout:fixed;">
             <tr >
-                <th class="col-md-2">Uid (657639)</th>
+                <th class="col-md-2">Uid ({{.Count}})</th>
                 <th class="col-md-2">Method</th>
                 <th class="col-md-2">Update Time</th>
                 <th class="col-md-2">Limit Time</th>
@@ -107,8 +107,9 @@
             </tr>
         </table>
         <center >
-            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}">&lt;&lt;</a>{{ end }}
-            {{ if .HasNext }}<a href="?page={{.Next}&limit={{.Limit}}">Next Page &gt;&gt;</a>{{ end }}
+            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">&lt;&lt;Previous Page</a>{{ end }}
+             { {{.Page}} }
+            {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">Next Page &gt;&gt;</a>{{ end }}
         </center>
             
     </body>

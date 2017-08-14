@@ -46,7 +46,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
             }
         }
-        fmt.Println("Execute ServeHTTP")
+        fmt.Println("Function : AuthMiddleware, Execute ServeHTTP")
         next.ServeHTTP(w, r)
     })
 }

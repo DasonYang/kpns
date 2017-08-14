@@ -9,6 +9,30 @@ import (
     "gopkg.in/mgo.v2/bson"
 )
 
+func makeQuery(query map[string]interface{}) bson.M {
+
+    var queries = make(bson.M)
+
+    for key := range query {
+        fmt.Printf("Function : makeQuery, key = %v\n", key)
+        if value, ok := query[key].(string); ok {
+            queries[key] = value
+        } else if value, ok := query[key].(map[string]interface{}); ok {
+            for f := range value {
+                switch f {
+                case "$regex":
+                    queries[key] = bson.RegEx{value[f].(string), "i"}
+                }
+            }
+
+        }
+    }
+
+    fmt.Printf("Function : makeQuery, queries = %v\n", queries)
+
+    return queries
+}
+
 func New() *DatabaseClient {
     session, err := mgo.Dial("localhost")
 
@@ -38,12 +62,14 @@ func (client *DatabaseClient) ReadOne(db string, collection string, query map[st
     return result
 }
 
-func (client *DatabaseClient) ReadAll(db string, collection string, query map[string]interface{}, condition map[string]interface{}) []map[string]interface{} {
+func (client *DatabaseClient) ReadAll(db string, collection string, query map[string]interface{}, condition map[string]interface{}) ([]map[string]interface{}, int) {
     var result []map[string]interface{}
 
     c := client.Session.DB(db).C(collection)
+    queries := makeQuery(query)
+    q := c.Find(queries)
 
-    q := c.Find(query)
+    count, _ := q.Count()
 
     if s, ok := condition["skip"]; ok {
         q = q.Skip(s.(int))
@@ -63,7 +89,7 @@ func (client *DatabaseClient) ReadAll(db string, collection string, query map[st
         log.Println(err)
     }
 
-    return result
+    return result, count
 }
 
 func (client *DatabaseClient) Write(db string, collection string, data map[string]interface{}) error {
@@ -90,10 +116,15 @@ func (client *DatabaseClient) Write(db string, collection string, data map[strin
 func(client *DatabaseClient) Count(db string, collection string, query map[string]interface{}) int {
     c := client.Session.DB(db).C(collection)
 
-    count, err := c.Find(query).Count()
+    queries := makeQuery(query)
+    count, err := c.Find(queries).Count()
     if err != nil {
         log.Println(err)
     }
 
     return count
+}
+
+func(client *DatabaseClient) Delete(db string, collection string, data map[string]interface{}) error {
+    return nil
 }

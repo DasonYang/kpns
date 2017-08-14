@@ -16,8 +16,9 @@ type ClientData struct {
 
 type DatabaseClient interface {
     Write(string, string, map[string]interface{}) error
-    ReadAll(string, string, map[string]interface{}, map[string]interface{})  []map[string]interface{}
+    ReadAll(string, string, map[string]interface{}, map[string]interface{})  ([]map[string]interface{}, int)
     ReadOne(string,string, map[string]interface{})   map[string]interface{}
+    Delete(string,string,map[string]interface{}) error
     Count(string, string, map[string]interface{}) int
 }
 
