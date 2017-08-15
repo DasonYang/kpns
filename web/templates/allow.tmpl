@@ -3,6 +3,47 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link rel="shortcut icon" href="/static/favicon.ico">
         <title >&nbsp;&nbsp;Allow List</title>
+        <style>
+        .dropbtn {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: auto auto auto auto;
+        }
+
+        .dropbtn:hover, .dropbtn:focus {
+            background-color: #3e8e41;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #09f909;
+            min-width: 500px;
+            overflow: auto;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            margin: auto 0 auto -500px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown a:hover {background-color: #f1f1f1}
+
+        .show {display:block;}
+        </style>
     </head>
     <body>
         <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
@@ -46,12 +87,6 @@
                                 <button class="btn btn-primary" onMouseOver="document.getElementById('action').value='search';">Search</button>
                             </div>
                         </center>
-                        <div class="col-md-1">
-                            <div class="btn alert-success">
-                                <span class="big glyphicon glyphicon-save"></span>
-                                <span onclick="window.open('?active=sample');"> Sample Txt.</span>
-                            </div>
-                        </div>
                     </b>
                 </center>
                 <div class="col-md-12"></div>
@@ -85,6 +120,16 @@
                 <input type="file" name="File" value="" id="file" style="display:none;" ></input>
             </div>
         </form>
+        <div class="dropdown pull-right">
+            <button onclick="myFunction()" class="dropbtn">Sample Txt.</button>
+            <div id="myDropdown" class="dropdown-content">
+                [UID1], [Limit Time], [Note], [Method]<br>
+                #範例<br>
+                abcde12345fghij67890, 2020/02/20, Test_Use<br>
+                #說明<br>
+                #UID20碼, yyyy/mm/dd (可使用至何時), 說明, 指定特殊模式(可不填)<br>
+            </div>
+        </div> 
         <table class="table table-striped" style="table-layout:fixed;">
             <tr >
                 <th class="col-md-2">Uid ({{.Count}})</th>
@@ -111,6 +156,30 @@
              { {{.Page}} }
             {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">Next Page &gt;&gt;</a>{{ end }}
         </center>
+
+    <script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+        return false;
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+    </script>
             
     </body>
 </html>

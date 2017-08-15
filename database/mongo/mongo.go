@@ -37,7 +37,7 @@ func New() *DatabaseClient {
     session, err := mgo.Dial("localhost")
 
     if err != nil {
-        panic(err)
+        log.Fatal(err)
     }
 
     session.SetMode(mgo.Monotonic, true)
@@ -125,6 +125,13 @@ func(client *DatabaseClient) Count(db string, collection string, query map[strin
     return count
 }
 
-func(client *DatabaseClient) Delete(db string, collection string, data map[string]interface{}) error {
-    return nil
+func(client *DatabaseClient) Delete(db string, collection string, query map[string]interface{}) error {
+
+    c := client.Session.DB(db).C(collection)
+
+    queries := makeQuery(query)
+
+    err := c.Remove(queries)
+
+    return err
 }

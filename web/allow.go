@@ -6,6 +6,7 @@ import (
     "reflect"
     "strconv"
     "net/http"
+    // "io/ioutil"
     "html/template"
 )
 
@@ -30,7 +31,7 @@ func genInput(limit, page int, note string, query map[string]interface{}) map[st
     params["skip"] = (pageIdx-1)*displayLimit
     params["limit"] = displayLimit
 
-    fmt.Printf("params = %v\n", params)
+    // fmt.Printf("params = %v\n", params)
 
     qs, count := dbClient.ReadAll("tpns", "allow", query, params)
 
@@ -54,11 +55,11 @@ func genInput(limit, page int, note string, query map[string]interface{}) map[st
         
         if str, f := value["note"].(string); f {data.Note = str}
         
-        fmt.Printf("type of limit = %v\n", reflect.TypeOf(value["limit"]))
+        // fmt.Printf("type of limit = %v\n", reflect.TypeOf(value["limit"]))
         allowList = append(allowList, data)
     }
 
-    fmt.Printf("count = %v\n", count)
+    // fmt.Printf("count = %v\n", count)
 
     input["Data"] = allowList
     input["Page"] = pageIdx
@@ -141,8 +142,11 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
             }
         }
 
-        if active == "del" {
-            
+        if active == "del" && len(uid) == 20 {
+            err := dbClient.Delete("tpns", "allow", map[string]interface{}{"key":uid})
+            if err != nil {
+                panic(nil)
+            }
         }
 
         input := genInput(limit, pageIdx, note, query)
@@ -154,6 +158,15 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
         var ltime string
         var mode string
+
+        file, _, err := r.FormFile("File")
+        if err != nil {
+            fmt.Println(err)
+
+        } 
+        if file != nil {
+            defer file.Close()
+        }
 
         for key, value := range r.PostForm {
             fmt.Printf("key = %v, value = %v\n", key, value)
@@ -172,6 +185,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                 mode = value[0]
             case "uid":
                 uid = value[0]
+
             }
         }
         
@@ -204,7 +218,6 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                 dbClient.Write("tpns", "allow", info)
                 note = "" 
             } else {
-                query["key"] = " "
                 note = ""
             }
         }
