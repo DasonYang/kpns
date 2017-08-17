@@ -20,6 +20,7 @@ type DatabaseClient interface {
     ReadOne(string,string, map[string]interface{})   map[string]interface{}
     Delete(string,string,map[string]interface{}) error
     Count(string, string, map[string]interface{}) int
+    BulkWrite(string, string, []interface{}) error
 }
 
 func NewDB(cfg config.CfgYaml) DatabaseClient {

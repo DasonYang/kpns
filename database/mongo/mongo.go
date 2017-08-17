@@ -135,3 +135,7 @@ func(client *DatabaseClient) Delete(db string, collection string, query map[stri
 
     return err
 }
+
+func(client *DatabaseClient)BulkWrite(db string, collection string, data []interface{}) error {
+    return nil
+}

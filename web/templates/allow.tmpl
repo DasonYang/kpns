@@ -84,7 +84,7 @@
                         <div class="col-md-2 big">Note</div>
                         <center >
                             <div class="col-md-1">
-                                <button class="btn btn-primary" onMouseOver="document.getElementById('action').value='search';">Search</button>
+                                <button class="btn btn-primary" type="submit" name="search">Search</button>
                             </div>
                         </center>
                     </b>
@@ -107,18 +107,14 @@
                 </div>
                 <center >
                     <div class="col-md-1">
-                        <button class="btn " onMouseOver="document.getElementById('action').value='save';">Save</button>
+                        <button class="btn " type="submit" name="save">Save</button>
                     </div>
                 </center>
-                <div class="col-md-1" onclick="document.getElementById('file').click();">
-                    <div class="btn alert-success">
-                        <span class="big glyphicon glyphicon-open"></span>
-                        <span >Upload Uid List</span>
-                    </div>
-                </div>
-                <input type="hidden" name="active" value="" id="action" ></input>
-                <input type="file" name="File" value="" id="file" style="display:none;" ></input>
             </div>
+        </form>
+        <form id="singular-create" style="margin-top: 24px" action="" method="post" class="form-inline" enctype="multipart/form-data">
+            <div class="form-group"> <input type="file" name="bf" id="bf" > </div>
+            <button type="submit" name="bsubmit" class="btn btn-default">Batch Upload</button>
         </form>
         <div class="dropdown pull-right">
             <button onclick="myFunction()" class="dropbtn">Sample Txt.</button>

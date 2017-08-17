@@ -3,12 +3,17 @@ package web
 import (
     "fmt"
     "time"
-    "reflect"
+    // "reflect"
+    "regexp"
+    "strings"
     "strconv"
     "net/http"
-    // "io/ioutil"
+    "io/ioutil"
     "html/template"
+
 )
+
+var validBatchFile = regexp.MustCompile(`\s*[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]*\s*(?:,\s*[\w]*){0,1}\s*$`)
 
 type AllowData struct {
     UID     string
@@ -18,7 +23,7 @@ type AllowData struct {
 }
 
 func genInput(limit, page int, note string, query map[string]interface{}) map[string]interface{} {
-    fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
+    //fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
     var input = make(map[string]interface{})
     var params = make(map[string]interface{})
     var allowList []AllowData
@@ -80,32 +85,6 @@ func genInput(limit, page int, note string, query map[string]interface{}) map[st
     return input
 }
 
-func genData(qs []map[string]interface{}) []AllowData {
-
-    var allowList []AllowData
-
-    for _, allow := range qs {
-        var data AllowData
-        if str, f := allow["key"].(string); f{data.UID = str}
-
-        value := allow["value"].(map[string]interface{})
-
-        if str, f := value["update_time"].(string); f {data.Updated = str}
-        
-        if ts, f := value["limit"].(float64); f {
-            tm := time.Unix(int64(ts), 0)
-            data.Limit = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-        }
-        
-        if str, f := value["note"].(string); f {data.Note = str}
-        
-        // fmt.Printf("data = %v\n", data)
-        allowList = append(allowList, data)
-    }
-
-    return allowList
-}
-
 func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
     // username, password, ok := r.BasicAuth()
@@ -113,7 +92,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
     var query = make(map[string]interface{})
     var pageIdx, limit int
-    var active, note, uid string
+    var note, uid string
 
     t, err := template.ParseFiles(TemplatePath+"/allow.tmpl")
     if err != nil {
@@ -123,8 +102,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
     if r.Method == "GET" {
         fmt.Println("================================Allow.GET=================================")
-        
-        
+        var active string
         for key, value := range r.URL.Query() {
             fmt.Printf("key = %v, value = %v\n", key, value)
             switch key {
@@ -159,66 +137,92 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         var ltime string
         var mode string
 
-        file, _, err := r.FormFile("File")
-        if err != nil {
-            fmt.Println(err)
+        if _, ok := r.PostForm["bsubmit"]; ok {// Handler uploaded file
+            file, _, err := r.FormFile("bf")
 
-        } 
-        if file != nil {
-            defer file.Close()
-        }
-
-        for key, value := range r.PostForm {
-            fmt.Printf("key = %v, value = %v\n", key, value)
-            switch key {
-            case "ltime":
-                ltime = value[0]
-            case "active":
-                active = value[0]
-            case "limit":
-                limit, _ = strconv.Atoi(value[0])
-            case "note":
-                note = value[0]
-                query["value.note"] = map[string]interface{}{"$regex":note}
-            case "File":
-            case "mode":
-                mode = value[0]
-            case "uid":
-                uid = value[0]
-
+            if err != nil {
+                fmt.Println(err)
             }
-        }
-        
+            if file != nil {
+                defer file.Close()
 
-        if active == "search" {
-            if limit < 20 {limit = 20}
-            if pageIdx == 0 {pageIdx = 1}
-
-            if len(uid) > 0 {
-                query["key"] = uid
-            }
-        } else if active == "save" {
-
-            if len(uid) > 0 && len(ltime) > 0 && len(note) > 0 {
-                tm, err := time.Parse("2006/01/02", ltime)
+                dat, err := ioutil.ReadAll(file)
 
                 if err != nil {
-                    panic(err)
+                    fmt.Printf("Read file with err = %v\n", err)
                 }
-                fmt.Println(tm.UnixNano(), ltime, mode)
 
-                query["key"] = uid
+                lines := strings.Split(string(dat), "\n")
 
-                info := map[string]interface{}{"key":uid}
-                data := make(map[string]interface{})
-                data["limit"] = int32(tm.Unix())
-                data["note"] = note
-                data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
-                info["value"] = data
-                dbClient.Write("tpns", "allow", info)
-                note = "" 
-            } else {
-                note = ""
+                fmt.Printf("lines = %v\n", lines)
+                // bulk_data := make([]map[string]interface{}, len(lines))
+                // var uids = make([]string, len(lines))
+                for _, line := range lines {
+                    if validBatchFile.MatchString(line) {
+                        // var _uid, _date, _note, _method string
+                        cols := strings.Split(line, ",")
+                        // _uid = strings.TrimSpace(cols[0])
+                        // _date = strings.TrimSpace(cols[1])
+                        // _note = strings.TrimSpace(cols[2])
+                        // if len(cols) == 4 {
+                        //     _method = strings.TrimSpace(cols[3])
+                        // }
+
+                        fmt.Printf("Splited cols = %v\n", cols[1])
+                        // info := map[string]interface{}{"key":strings.TrimSpace(cols[0])}
+                    }
+                }
+            }
+        } else {// Handle normal operation
+            for key, value := range r.PostForm {
+                fmt.Printf("key = %v, value = %v\n", key, value)
+                switch key {
+                case "ltime":
+                    ltime = value[0]
+                case "limit":
+                    limit, _ = strconv.Atoi(value[0])
+                case "note":
+                    note = value[0]
+                    query["value.note"] = map[string]interface{}{"$regex":note}
+                case "File":
+                case "mode":
+                    mode = value[0]
+                case "uid":
+                    uid = value[0]
+
+                }
+            }
+            
+            if _, ok := r.PostForm["search"]; ok {// Search clicked
+                if limit < 20 {limit = 20}
+                if pageIdx == 0 {pageIdx = 1}
+
+                if len(uid) > 0 {
+                    query["key"] = uid
+                }
+            } else if _, ok := r.PostForm["save"]; ok {// Save clicked
+
+                if len(uid) > 0 && len(ltime) > 0 && len(note) > 0 {
+                    tm, err := time.Parse("2006/01/02", ltime)
+
+                    if err != nil {
+                        panic(err)
+                    }
+                    fmt.Println(tm.UnixNano(), ltime, mode)
+
+                    query["key"] = uid
+
+                    info := map[string]interface{}{"key":uid}
+                    data := make(map[string]interface{})
+                    data["limit"] = int32(tm.Unix())
+                    data["note"] = note
+                    data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
+                    info["value"] = data
+                    dbClient.Write("tpns", "allow", info)
+                    note = "" 
+                } else {
+                    note = ""
+                }
             }
         }
 
