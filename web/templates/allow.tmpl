@@ -45,7 +45,7 @@
         .show {display:block;}
         </style>
     </head>
-    <body>
+    <body onload="checkStatus()">
         <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
             <h2 style="cursor:pointer">&nbsp;&nbsp;<span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;Allow List<small >&nbsp;&nbsp;&nbsp;&nbsp;UID Allow List Management </small></h2>
         </div>
@@ -120,8 +120,10 @@
             <button onclick="myFunction()" class="dropbtn">Sample Txt.</button>
             <div id="myDropdown" class="dropdown-content">
                 [UID1], [Limit Time], [Note], [Method]<br>
-                #範例<br>
-                abcde12345fghij67890, 2020/02/20, Test_Use<br>
+                #範例-新增或修改<br>
+                ABCDE12345FGHIJ67890, 2020/02/20, Test_Use<br>
+                #範例-刪除<br>
+                -ABCDE12345FGHIJ67890, 2020/02/20, Test_Use<br>
                 #說明<br>
                 #UID20碼, yyyy/mm/dd (可使用至何時), 說明, 指定特殊模式(可不填)<br>
             </div>
@@ -156,6 +158,11 @@
     <script>
     /* When the user clicks on the button, 
     toggle between hiding and showing the dropdown content */
+    function checkStatus() {
+        {{if .Success}}
+        alert("Batch upload finish!");
+        {{end}}
+    }
     function myFunction() {
         document.getElementById("myDropdown").classList.toggle("show");
         return false;

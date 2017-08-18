@@ -1,0 +1,65 @@
+<html >
+<head ><!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <title >&nbsp;&nbsp;Search Database </title>
+</head>
+<body>
+    <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
+        <h2 style="cursor:pointer">&nbsp;&nbsp;
+        <span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;Search Database 
+        <small >&nbsp;&nbsp;&nbsp;&nbsp;Search all data in databases. </small>
+        </h2>
+    </div>
+    <div id='bar' style='display:none;' onMouseOver="document.getElementById('bar').style.display='';" onMouseOut="document.getElementById('bar').style.display='none';">
+        <div  class="alert alert-info col-md-12">
+            <center >
+                <span class="glyphicon glyphicon-list-alt" style="cursor:pointer" onclick="document.location.href='log'"> Logs</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-globe" style="cursor:pointer" onclick="document.location.href='lang'"> Language</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-lock" style="cursor:pointer" onclick="document.location.href='appkey'"> AppKey</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'"> Allow</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-tag" style="cursor:pointer" onclick="document.location.href='tag'"> Tag</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-cloud" style="cursor:pointer" onclick="document.location.href='s3'"> S3</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'"> Account</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'"> Trace</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'"> Logout</span>
+            </center>
+        </div>
+        <div  class="col-md-12">&nbsp;</div>
+    </div>
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="inputEvent Type" class="col-md-1 control-label">Event Type</label>
+            <div class="col-md-1">
+                <input type="text" name="event" value="" id="inputEvent Type" class="form-control"></input>
+            </div>
+            <label for="inputUid" class="col-md-1 control-label">Uid</label>
+            <div class="col-md-2">
+                <input type="text" name="uid" value="" id="inputUid" class="form-control"></input>
+            </div>
+            <label for="inputClient No." class="col-md-1 control-label">Client No.</label>
+            <div class="col-md-3">
+                <input type="text" name="no" value="" id="inputClient No." class="form-control"></input>
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-striped" style="table-layout:fixed;">
+        <tr >
+            <th class="col-md-3">Key</th>
+            <th class="col-md-1">DB</th>
+            <th class="col-md-9">Value</th>
+        </tr>
+    </table>
+</body>>
+</html>

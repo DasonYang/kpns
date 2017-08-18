@@ -97,6 +97,23 @@ func (client *DatabaseClient) Write(db string, collection string, data map[strin
     c := client.Session.DB(db).C(collection)
     key := fmt.Sprintf("%v", data["key"])
 
+    // Index
+    // index := mgo.Index{
+    //     Key:        []string{"key"},
+    //     Unique:     true,
+    //     DropDups:   true,
+    //     Background: true,
+    //     Sparse:     true,
+    // }
+
+    {
+        err := c.EnsureIndexKey("key")
+        if err != nil {
+            panic(err)
+        }
+    }
+
+
     /*
     type ChangeInfo struct {
         Updated    int         // Number of existing documents updated
@@ -137,5 +154,33 @@ func(client *DatabaseClient) Delete(db string, collection string, query map[stri
 }
 
 func(client *DatabaseClient)BulkWrite(db string, collection string, data []interface{}) error {
-    return nil
+
+    c := client.Session.DB(db).C(collection)
+    b := c.Bulk()
+
+    // Index
+    // index := mgo.Index{
+    //     Key:        []string{"key"},
+    //     Unique:     true,
+    //     DropDups:   true,
+    //     Background: true,
+    //     Sparse:     true,
+    // }
+
+    {// Ensure index
+        err := c.EnsureIndexKey("key")
+        if err != nil {
+            panic(err)
+        }
+    }
+
+    fmt.Printf("data = %v\n", data...)
+
+    b.Insert(data...)
+
+    res, err := b.Run()
+
+    fmt.Printf("res = %v\n", res)
+
+    return err
 }

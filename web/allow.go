@@ -1,6 +1,7 @@
 package web
 
 import (
+    "log"
     "fmt"
     "time"
     // "reflect"
@@ -13,7 +14,12 @@ import (
 
 )
 
-var validBatchFile = regexp.MustCompile(`\s*[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]*\s*(?:,\s*[\w]*){0,1}\s*$`)
+const (
+    db_name = "tpns"
+    collection_name = "allow"
+)
+
+var validBatchFile = regexp.MustCompile(`^-?[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]*\s*(?:,\s*[\w]*)?\s*$`)
 
 type AllowData struct {
     UID     string
@@ -22,7 +28,7 @@ type AllowData struct {
     Note    string
 }
 
-func genInput(limit, page int, note string, query map[string]interface{}) map[string]interface{} {
+func genInput(limit, page int, note string, query map[string]interface{}, success bool) map[string]interface{} {
     //fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
     var input = make(map[string]interface{})
     var params = make(map[string]interface{})
@@ -38,7 +44,7 @@ func genInput(limit, page int, note string, query map[string]interface{}) map[st
 
     // fmt.Printf("params = %v\n", params)
 
-    qs, count := dbClient.ReadAll("tpns", "allow", query, params)
+    qs, count := dbClient.ReadAll(db_name, collection_name, query, params)
 
     for _, allow := range qs {
         var data AllowData
@@ -72,6 +78,7 @@ func genInput(limit, page int, note string, query map[string]interface{}) map[st
     input["Limit"] = displayLimit
     input["HasNote"] = true
     input["Note"] = note
+    input["Success"] = success
 
     if pageIdx > 1 {
         input["HasPre"] = true
@@ -121,13 +128,13 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         if active == "del" && len(uid) == 20 {
-            err := dbClient.Delete("tpns", "allow", map[string]interface{}{"key":uid})
+            err := dbClient.Delete(db_name, collection_name, map[string]interface{}{"key":uid})
             if err != nil {
-                panic(nil)
+                panic(err)
             }
         }
 
-        input := genInput(limit, pageIdx, note, query)
+        input := genInput(limit, pageIdx, note, query, false)
 
         t.Execute(w, input)
     } else {
@@ -136,6 +143,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
         var ltime string
         var mode string
+        var isBatchDone bool
 
         if _, ok := r.PostForm["bsubmit"]; ok {// Handler uploaded file
             file, _, err := r.FormFile("bf")
@@ -154,24 +162,39 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
                 lines := strings.Split(string(dat), "\n")
 
-                fmt.Printf("lines = %v\n", lines)
-                // bulk_data := make([]map[string]interface{}, len(lines))
-                // var uids = make([]string, len(lines))
                 for _, line := range lines {
                     if validBatchFile.MatchString(line) {
-                        // var _uid, _date, _note, _method string
                         cols := strings.Split(line, ",")
-                        // _uid = strings.TrimSpace(cols[0])
-                        // _date = strings.TrimSpace(cols[1])
-                        // _note = strings.TrimSpace(cols[2])
-                        // if len(cols) == 4 {
-                        //     _method = strings.TrimSpace(cols[3])
-                        // }
+                        _uid := strings.TrimSpace(cols[0])
 
-                        fmt.Printf("Splited cols = %v\n", cols[1])
-                        // info := map[string]interface{}{"key":strings.TrimSpace(cols[0])}
+                        if ok := strings.HasPrefix(_uid, "-"); ok{
+                            err := dbClient.Delete(db_name, collection_name, map[string]interface{}{"key":_uid[1:]})
+                            if err != nil {
+                                log.Printf("Error while deleting data with uid : %v, message = %v\n", _uid[1:], err)
+                            }
+                            continue
+                        }
+
+                        info := map[string]interface{}{"key":_uid}
+                        data := make(map[string]interface{})
+
+                        data["note"] = strings.TrimSpace(cols[2])
+                        tm, _ := time.Parse("2006/01/02", strings.TrimSpace(cols[1]))
+                        data["limit"] = int32(tm.Unix())
+                        if len(cols) == 4 {
+                            data["method"] = strings.TrimSpace(cols[3])
+                        }
+                        data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
+                        info["value"] = data
+
+                        err = dbClient.Write(db_name, collection_name, info)
+
+                        if err != nil {
+                            log.Printf("Error while inserting data with uid : %v, message = %v\n", _uid[1:], err)
+                        }
                     }
                 }
+                isBatchDone = true
             }
         } else {// Handle normal operation
             for key, value := range r.PostForm {
@@ -218,7 +241,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                     data["note"] = note
                     data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
                     info["value"] = data
-                    dbClient.Write("tpns", "allow", info)
+                    dbClient.Write(db_name, collection_name, info)
                     note = "" 
                 } else {
                     note = ""
@@ -226,7 +249,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
             }
         }
 
-        input := genInput(limit, pageIdx, note, query)
+        input := genInput(limit, pageIdx, note, query, isBatchDone)
 
         t.Execute(w, input)
     }
