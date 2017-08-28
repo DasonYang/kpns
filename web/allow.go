@@ -4,6 +4,7 @@ import (
     "log"
     "fmt"
     "time"
+    // "context"
     // "reflect"
     "regexp"
     "strings"
@@ -12,11 +13,6 @@ import (
     "io/ioutil"
     "html/template"
 
-)
-
-const (
-    db_name = "tpns"
-    collection_name = "allow"
 )
 
 var validBatchFile = regexp.MustCompile(`^-?[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]*\s*(?:,\s*[\w]*)?\s*$`)
@@ -28,7 +24,7 @@ type AllowData struct {
     Note    string
 }
 
-func genInput(limit, page int, note string, query map[string]interface{}, success bool) map[string]interface{} {
+func genInput(limit, page int, note string, query map[string]interface{}, success bool, writable bool) map[string]interface{} {
     //fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
     var input = make(map[string]interface{})
     var params = make(map[string]interface{})
@@ -44,7 +40,7 @@ func genInput(limit, page int, note string, query map[string]interface{}, succes
 
     // fmt.Printf("params = %v\n", params)
 
-    qs, count := dbClient.ReadAll(db_name, collection_name, query, params)
+    qs, count := dbClient.ReadAll(db_name, "allow", query, params)
 
     for _, allow := range qs {
         var data AllowData
@@ -79,6 +75,7 @@ func genInput(limit, page int, note string, query map[string]interface{}, succes
     input["HasNote"] = true
     input["Note"] = note
     input["Success"] = success
+    input["Writable"] = writable
 
     if pageIdx > 1 {
         input["HasPre"] = true
@@ -95,8 +92,8 @@ func genInput(limit, page int, note string, query map[string]interface{}, succes
 func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
     // username, password, ok := r.BasicAuth()
-    // fmt.Println("================================Allow=================================")
-
+    fmt.Println("================================Allow=================================", r.Context().Value("Writable"))
+    var writable = r.Context().Value("Writable").(bool)
     var query = make(map[string]interface{})
     var pageIdx, limit int
     var note, uid string
@@ -128,13 +125,13 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         if active == "del" && len(uid) == 20 {
-            err := dbClient.Delete(db_name, collection_name, map[string]interface{}{"key":uid})
+            err := dbClient.Delete(db_name, "allow", map[string]interface{}{"key":uid})
             if err != nil {
                 panic(err)
             }
         }
 
-        input := genInput(limit, pageIdx, note, query, false)
+        input := genInput(limit, pageIdx, note, query, false, writable)
 
         t.Execute(w, input)
     } else {
@@ -168,7 +165,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                         _uid := strings.TrimSpace(cols[0])
 
                         if ok := strings.HasPrefix(_uid, "-"); ok{
-                            err := dbClient.Delete(db_name, collection_name, map[string]interface{}{"key":_uid[1:]})
+                            err := dbClient.Delete(db_name, "allow", map[string]interface{}{"key":_uid[1:]})
                             if err != nil {
                                 log.Printf("Error while deleting data with uid : %v, message = %v\n", _uid[1:], err)
                             }
@@ -187,7 +184,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                         data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
                         info["value"] = data
 
-                        err = dbClient.Write(db_name, collection_name, info)
+                        err = dbClient.Write(db_name, "allow", info)
 
                         if err != nil {
                             log.Printf("Error while inserting data with uid : %v, message = %v\n", _uid[1:], err)
@@ -241,7 +238,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
                     data["note"] = note
                     data["update_time"] = time.Now().Format("2006-01-02 15:04:05")
                     info["value"] = data
-                    dbClient.Write(db_name, collection_name, info)
+                    dbClient.Write(db_name, "allow", info)
                     note = "" 
                 } else {
                     note = ""
@@ -249,7 +246,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
             }
         }
 
-        input := genInput(limit, pageIdx, note, query, isBatchDone)
+        input := genInput(limit, pageIdx, note, query, isBatchDone, writable)
 
         t.Execute(w, input)
     }

@@ -71,8 +71,6 @@ func checkAccount(username, password string) (string, string) {
         }
     }
 
-
-
     fmt.Printf("ret = %v\n", ret)
 
     return "", ""
@@ -136,7 +134,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             http.SetCookie(w, &http.Cookie{Name: "token", Value: token, Expires: expiration})
             http.SetCookie(w, &http.Cookie{Name: "mode", Value: mode, Expires: expiration})
             http.SetCookie(w, &http.Cookie{Name: "user", Value: username, Expires: expiration})
-            http.Redirect(w, r, "/allow", http.StatusSeeOther)
+            http.Redirect(w, r, "/search", http.StatusSeeOther)
         }
     }
 }

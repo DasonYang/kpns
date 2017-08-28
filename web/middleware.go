@@ -3,19 +3,16 @@ package web
 import(
     "fmt"
     "net/http"
-)
-
-var (
-    Permissions = map[string][]string{"all":{"allow", "appkey", "search"}, 
-                                      "editor":{"search",},
-                                      "basic":{"search",}}
+    "context"
 )
 
 type Adapter func(http.Handler) http.Handler
 
 func AuthMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        var user, token string
+        var user, token, mode string
+        var allowed bool
+        var ctx = context.WithValue(r.Context(), "Writable", false)
 
         var cookies = make(map[string]string)
         for _, cookie := range r.Cookies() {cookies[cookie.Name] = cookie.Value}
@@ -43,11 +40,32 @@ func AuthMiddleware(next http.Handler) http.Handler {
                         return
                     }
                 }
+                if m, ok := value["mode"].(string); ok {
+                    mode = m
+                }
+            }
 
+            if levels, ok := Permissions[mode]; ok {
+
+                fmt.Println("val = ", levels)
+
+                if rules, ok := levels[r.URL.Path[1:]]; ok {
+                    if rules.Readable {
+                        fmt.Println("allow to access")
+                        allowed = true
+
+                        ctx = context.WithValue(r.Context(), "Writable", rules.Writable)
+                    }
+                }
+            }
+
+            if !allowed {
+                http.Redirect(w, r, "/search", http.StatusSeeOther)
+                return
             }
         }
         fmt.Println("Function : AuthMiddleware, Execute ServeHTTP")
-        next.ServeHTTP(w, r)
+        next.ServeHTTP(w, r.WithContext(ctx))
     })
 }
 

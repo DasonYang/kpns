@@ -136,10 +136,14 @@
                 <th class="col-md-2">Limit Time</th>
                 <th class="col-md-3">Note</th>
             </tr>
+            {{ $writable := .Writable }}
             {{ range .Data}}
             <tr >
                 <td >
-                    <span class="btn-link glyphicon glyphicon-remove-circle" onclick="if(confirm(&quot;確定刪除？&quot;)==true){document.location.href='?uid={{.UID}}&active=del';};"></span>&nbsp;&nbsp;{{.UID}}
+                    {{ if $writable }}
+                    <span class="btn-link glyphicon glyphicon-remove-circle" onclick="if(confirm(&quot;確定刪除？&quot;)==true){document.location.href='?uid={{.UID}}&active=del';};"></span>
+                    {{ end }}
+                    &nbsp;&nbsp;{{.UID}}
                 </td>
                 <td ></td>
                 <td >{{.Updated}}</td>

@@ -1,0 +1,77 @@
+admin:
+  account:
+    readable: true
+    writable: true
+  allow:
+    readable: true
+    writable: true
+  appkey:
+    readable: true
+    writable: true
+  language:
+    readable: true
+    writable: true
+  log:
+    readable: true
+    writable: true
+  search:
+    readable: true
+    writable: true
+all:
+  account:
+    readable: true
+    writable: true
+  allow:
+    readable: true
+    writable: true
+  appkey:
+    readable: true
+    writable: true
+  language:
+    readable: true
+    writable: true
+  log:
+    readable: true
+    writable: true
+  search:
+    readable: true
+    writable: true
+mis:
+  account:
+    readable: true
+    writable: true
+  allow:
+    readable: true
+    writable: true
+  appkey:
+    readable: true
+    writable: true
+  language:
+    readable: true
+    writable: true
+  log:
+    readable: true
+    writable: true
+  search:
+    readable: true
+    writable: true
+fae:
+  appkey:
+    readable: true
+    writable: true
+  language:
+    readable: true
+    writable: true
+  log:
+    readable: true
+    writable: true
+  search:
+    readable: true
+    writable: true
+default:
+  search:
+    readable: true
+    writable: true
+  log:
+    readable: true
+    writable: true

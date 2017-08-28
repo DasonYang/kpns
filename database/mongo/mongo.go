@@ -82,7 +82,7 @@ func (client *DatabaseClient) ReadAll(db string, collection string, query map[st
     if s, ok := condition["sort"]; ok {
         sort := fmt.Sprintf("%v", s)
         q = q.Sort(sort)
-    } 
+    }
 
     err := q.All(&result)
     if err != nil {
