@@ -166,6 +166,7 @@ func RunServer() {
     http.HandleFunc("/login", web.LoginHandler)
     http.Handle("/allow", web.AuthMiddleware(http.HandlerFunc(web.AllowHandler)))
     http.Handle("/search", web.AuthMiddleware(http.HandlerFunc(web.SearchHandler)))
+    http.Handle("/appkey", web.AuthMiddleware(http.HandlerFunc(web.AppKeyHandler)))
 
     http.ListenAndServe(":8080", nil)
 }

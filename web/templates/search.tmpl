@@ -60,6 +60,13 @@
             <th class="col-md-1">DB</th>
             <th class="col-md-9">Value</th>
         </tr>
+        {{ range .Data}}
+        <tr >
+            <td >{{.Key}}</td>
+            <td >{{.DB}}</td>
+            <td >{{.Value}}</td>
+        </tr>
+        {{ end }}
     </table>
 </body>
 </html>

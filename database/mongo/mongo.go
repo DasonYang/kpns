@@ -18,10 +18,16 @@ func makeQuery(query map[string]interface{}) bson.M {
         if value, ok := query[key].(string); ok {
             queries[key] = value
         } else if value, ok := query[key].(map[string]interface{}); ok {
-            for f := range value {
-                switch f {
+            for v := range value {
+                switch v {
                 case "$regex":
-                    queries[key] = bson.RegEx{value[f].(string), "i"}
+                    queries[key] = bson.RegEx{value[v].(string), "i"}
+                case "$exists":
+                    queries[key] = bson.M{"$exists" : value[v].(bool)}
+                case "$or":
+                    // if vv, okk := value[v].(map[string]interface{}); okk {
+                    //     var l []bson.M 
+                    // }
                 }
             }
 
