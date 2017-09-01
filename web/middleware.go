@@ -22,7 +22,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
         if user == "" || token == "" {
             // Not login or expired
-            http.Redirect(w, r, "/login", http.StatusSeeOther)
+            redirect := "/login?next="+r.URL.Path[1:]
+            http.Redirect(w, r, redirect, http.StatusSeeOther)
             return
         } else {
             // Auth verified

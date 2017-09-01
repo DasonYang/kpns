@@ -9,35 +9,68 @@ import (
     "gopkg.in/mgo.v2/bson"
 )
 
-func makeQuery(query map[string]interface{}) bson.M {
+// func makeQuery(query map[string]interface{}) bson.M {
 
-    var queries = make(bson.M)
+//     var queries = make(bson.M)
 
-    for key := range query {
-        fmt.Printf("Function : makeQuery, key = %v\n", key)
-        if value, ok := query[key].(string); ok {
-            queries[key] = value
-        } else if value, ok := query[key].(map[string]interface{}); ok {
-            for v := range value {
-                switch v {
-                case "$regex":
-                    queries[key] = bson.RegEx{value[v].(string), "i"}
-                case "$exists":
-                    queries[key] = bson.M{"$exists" : value[v].(bool)}
-                case "$or":
-                    // if vv, okk := value[v].(map[string]interface{}); okk {
-                    //     var l []bson.M 
-                    // }
-                }
-            }
+//     for key := range query {
+//         fmt.Printf("Function : makeQuery, key = %v\n", key)
 
-        }
-    }
+//         if value, ok := query[key].(map[string]interface{}); ok {
+//             // fmt.Println("Function : makeQuery, value is dict")
+//             queries[key] = makeQuery(value)
+//         } else if value, ok := query[key].([]map[string]interface{}); ok {
+//             // fmt.Println("Function : makeQuery, value is dict array")
+//             var q []bson.M
+//             for _, v := range value { q = append(q, makeQuery(v)) }
+//             queries[key] = q
+//         } else {
+//             // fmt.Println("Function : makeQuery, value is interface : ", query[key])
+//             queries[key] = query[key]
+//         }
+//     }
 
-    fmt.Printf("Function : makeQuery, queries = %v\n", queries)
+//     return queries
+// }
 
-    return queries
-}
+// func makeQuery(query map[string]interface{}) bson.M {
+
+//     var queries = make(bson.M)
+
+//     for key := range query {
+//         fmt.Printf("Function : makeQuery, key = %v\n", key)
+
+//         switch key{
+//         case "$or":
+//             if value, ok := query[key].(map[string]interface{}); ok {
+//                 var l []bson.M
+//                 for kk := range value {
+//                     l = append(l, bson.M{kk:value[kk]})
+//                 }
+//                 queries[key] = l
+//             }
+//         default:
+//             if value, ok := query[key].(string); ok {
+//                 queries[key] = value
+//             } else if value, ok := query[key].(map[string]interface{}); ok {
+//                 queries[key] = makeQuery(value)
+//                 // for v := range value {
+//                 //     switch v {
+//                 //     case "$regex":
+//                 //         queries[key] = bson.RegEx{value[v].(string), "i"}
+//                 //     case "$exists":
+//                 //         queries[key] = bson.M{"$exists" : value[v].(bool)}
+//                 //     }
+//                 // }
+
+//             }
+//         }
+//     }
+
+//     fmt.Printf("Function : makeQuery, queries = %v\n", queries)
+
+//     return queries
+// }
 
 func New() *DatabaseClient {
     session, err := mgo.Dial("localhost")
@@ -72,8 +105,7 @@ func (client *DatabaseClient) ReadAll(db string, collection string, query map[st
     var result []map[string]interface{}
 
     c := client.Session.DB(db).C(collection)
-    queries := makeQuery(query)
-    q := c.Find(queries)
+    q := c.Find(query)
 
     count, _ := q.Count()
 
@@ -138,9 +170,7 @@ func (client *DatabaseClient) Write(db string, collection string, data map[strin
 
 func(client *DatabaseClient) Count(db string, collection string, query map[string]interface{}) int {
     c := client.Session.DB(db).C(collection)
-
-    queries := makeQuery(query)
-    count, err := c.Find(queries).Count()
+    count, err := c.Find(query).Count()
     if err != nil {
         log.Println(err)
     }
@@ -152,9 +182,7 @@ func(client *DatabaseClient) Delete(db string, collection string, query map[stri
 
     c := client.Session.DB(db).C(collection)
 
-    queries := makeQuery(query)
-
-    err := c.Remove(queries)
+    err := c.Remove(query)
 
     return err
 }

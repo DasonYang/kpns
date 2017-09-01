@@ -126,7 +126,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             t.Execute(w, info)
         } else {
             // Login success
-
+            var redirect string = "/search"
+            for key, value := range r.URL.Query() {
+                switch key{
+                case "next":
+                    redirect = "/"+value[0]
+                }
+            }
             expiration := time.Now()
             expiration = expiration.Add(time.Hour * time.Duration(1))
             fmt.Printf("expiration = %v, token = %v, mode = %v\n", expiration, token, mode)
@@ -134,7 +140,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             http.SetCookie(w, &http.Cookie{Name: "token", Value: token, Expires: expiration})
             http.SetCookie(w, &http.Cookie{Name: "mode", Value: mode, Expires: expiration})
             http.SetCookie(w, &http.Cookie{Name: "user", Value: username, Expires: expiration})
-            http.Redirect(w, r, "/search", http.StatusSeeOther)
+            http.Redirect(w, r, redirect, http.StatusSeeOther)
         }
     }
 }
