@@ -1,0 +1,111 @@
+<html >
+    <head >
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="shortcut icon" href="/static/favicon.ico">
+        <title >&nbsp;&nbsp;Logs Page </title>
+    </head>
+    <body>
+        <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
+            <h2 style="cursor:pointer">&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-th"></span>
+                &nbsp;&nbsp;Logs Page <small >&nbsp;&nbsp;&nbsp;&nbsp;Search all historical events </small>
+            </h2>
+        </div>
+        <div id='bar' style='display:none;' onMouseOver="document.getElementById('bar').style.display='';" onMouseOut="document.getElementById('bar').style.display='none';">
+            <div  class="alert alert-info col-md-12">
+                <center >
+                    <span class="glyphicon glyphicon-search" style="cursor:pointer" onclick="document.location.href='search'">
+                     Search
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-globe" style="cursor:pointer" onclick="document.location.href='lang'">
+                     Language
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-lock" style="cursor:pointer" onclick="document.location.href='appkey'">
+                     AppKey</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'">
+                     Allow
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-tag" style="cursor:pointer" onclick="document.location.href='tag'">
+                     Tag
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-cloud" style="cursor:pointer" onclick="document.location.href='s3'">
+                     S3
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'">
+                     Account
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'">
+                     Trace
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'">
+                     Logout
+                    </span>
+            </center>
+            </div>
+            <div  class="col-md-12">&nbsp;
+            </div>
+        </div>
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="inputLimit" class="col-md-1 control-label">Limit</label>
+                <div class="col-md-1">
+                    <input type="text" name="limit" value="20" id="inputLimit" class="form-control"></input>
+                </div>
+                <label for="inputStatus" class="col-md-1 control-label">Status</label>
+                <div class="col-md-1">
+                    <input type="text" name="status" value="" id="inputStatus" class="form-control"></input>
+                </div>
+                <label for="inputFrom" class="col-md-1 control-label">From</label>
+                <div class="col-md-2">
+                    <input type="text" name="from" value="2017/9/7 11:22:23" id="inputFrom" class="form-control"></input>
+                </div>
+                <label for="inputTo" class="col-md-1 control-label">To</label>
+                <div class="col-md-2">
+                    <input type="text" name="to" value="" id="inputTo" class="form-control"></input>
+                </div>
+                <div class="col-md-12"></div>
+                <label for="inputIP" class="col-md-1 control-label">IP</label>
+                <div class="col-md-2">
+                    <input type="text" name="ip" value="" id="inputIP" class="form-control"></input>
+                </div>
+                <label for="inputText" class="col-md-1 control-label">Text</label>
+                <div class="col-md-4">
+                    <input type="text" name="text" value="" id="inputText" class="form-control"></input>
+                </div>
+                <div class="col-md-1 checkbox">
+                    <input name=skip type="checkbox" >Show 422 INFO
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary">Filter</button>
+                </div>
+            </div>   
+        </form>
+        <table class="table table-striped" style="table-layout:fixed;">
+            <tr >
+                <th class="col-md-2">DateTime (2082807)</th>
+                <th class="col-md-1">Status</th>
+                <th class="col-md-9">Content</th>
+            </tr>
+            <tr >
+                <td >Fri Sep  8 11:23:25 2017 (0.00)</td>
+                <td >411 > us-kpns-work-1</td>
+                <td >411 Mapping Error. : raise_event @ 172.35.1.100 >> {u'uid': u'K5LKK71LS8SR8FLN111A', u'event_time': u'http://120.24.84.182:9090/file/K5LKK71LS8SR8FLN111A/201709/07/201709072022460ab0000.jpg', u'ip': u'172.35.1.100', u'msg': u'VIDEO MOTION', u'received_at': 1504840967.552139, u'event_type': u'100'}</td>
+            </tr>
+            <tr >
+                <td >Fri Sep  8 11:23:25 2017 (0.00)</td>
+                <td >411 > us-kpns-work-1</td>
+                <td >411 Mapping Error. : event @ 172.35.1.100 >> {u'event_type': u'100', u'channel_event': u'[{"channel":4,"event_type":1,"start_time":1504876980,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504876983,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504876986,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504876989,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504876992,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504876995,"end_time":0,"DST":0,"overlapId":10},{"channel":12,"event_type":1,"start_time":1504876998,"end_time":0,"DST":0,"overlapId":10},{"channel":12,"event_type":1,"start_time":1504877001,"end_time":0,"DST":0,"overlapId":10},{"channel":12,"event_type":1,"start_time":1504877004,"end_time":0,"DST":0,"overlapId":10},{"channel":12,"event_type":1,"start_time":1504877007,"end_time":0,"DST":0,"overlapId":10},{"channel":4,"event_type":1,"start_time":1504877010,"end_time":0,"DST":0,"overlapId":10}]', u'ip': u'172.35.1.100', u'msg': u'XRN-810S', u'received_at': 1504840967.517846, u'uid': u'RHBWUV38SNG1H155111A'}</td>
+            </tr>
+        </table>
+        <center >&lt;&lt; <a href="?limit=20,20&from=&to=&status=&ip=&text=">Next Page &gt;&gt;</a></center>
+    </body>
+</html>

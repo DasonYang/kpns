@@ -178,11 +178,41 @@ func(client *DatabaseClient) Count(db string, collection string, query map[strin
     return count
 }
 
+func(client *DatabaseClient) Update(db string, collection string, query map[string]interface{}, content map[string]interface{}) error {
+    c := client.Session.DB(db).C(collection)
+    fmt.Printf("query = %v, content = %v\n", query, content)
+
+    {
+        err := c.EnsureIndexKey("key")
+        if err != nil {
+            panic(err)
+        }
+    }
+
+    info, err := c.Upsert(query, content)
+    // err := c.Update(bson.M{"key":"enUS"}, bson.M{"$unset":bson.M{"100":""}})
+
+    // err := c.Update(query, content, params)
+
+    log.Printf("updated = %v, removed = %v, upsertedId = %v\n", info.Updated, info.Removed, info.UpsertedId)
+
+    if err != nil {
+        log.Printf("error = %v\n", err)
+    }
+
+    return err
+}
+
 func(client *DatabaseClient) Delete(db string, collection string, query map[string]interface{}) error {
 
+    log.Printf("Delete : query = %v\n", query)
     c := client.Session.DB(db).C(collection)
 
     err := c.Remove(query)
+
+    if err != nil {
+        log.Printf("error = %v\n", err)
+    }
 
     return err
 }

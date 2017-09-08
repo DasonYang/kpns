@@ -1,0 +1,175 @@
+<html >
+    <head >
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="shortcut icon" href="/static/favicon.ico">
+        <title >&nbsp;&nbsp;Message Settings </title>
+        <style>
+        .dropbtn {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: auto auto auto auto;
+        }
+
+        .dropbtn:hover, .dropbtn:focus {
+            background-color: #3e8e41;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #09f909;
+            min-width: 500px;
+            overflow: auto;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            margin: auto 0 auto -500px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown a:hover {background-color: #f1f1f1}
+
+        .show {display:block;}
+        </style>
+    </head>
+    <body>
+        {{ $writable := .Writable }}
+        <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
+            <h2 style="cursor:pointer">&nbsp;&nbsp;<span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;Message Settings <small >&nbsp;&nbsp;&nbsp;&nbsp;Set the regional languages to event messages</small>
+            </h2>
+        </div>
+        <div id='bar' style='display:none;' onMouseOver="document.getElementById('bar').style.display='';" onMouseOut="document.getElementById('bar').style.display='none';">
+            <div  class="alert alert-info col-md-12">
+                <center >
+                    <span class="glyphicon glyphicon-search" style="cursor:pointer" onclick="document.location.href='search'"> 
+                    Search
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-list-alt" style="cursor:pointer" onclick="document.location.href='log'">
+                     Logs
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-lock" style="cursor:pointer" onclick="document.location.href='appkey'">
+                     AppKey
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'">
+                     Allow
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'">
+                     Account
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'">
+                     Trace
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'">
+                     Logout
+                    </span>
+                </center>
+            </div>
+            <div  class="col-md-12">&nbsp;</div>
+        </div>
+        <form method="POST" enctype="multipart/form-data" class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="inputLang." class="navbar-brand col-md-1 control-label">Lang.</label>
+                <div class="col-md-1">
+                    <input type="text" name="lang" value="{{.Lang}}" id="inputLang." placeholder="enUS" class="form-control input-md">
+                    </input>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary" name="search">Search</button>
+                </div>
+                <label for="inputStatus" class="navbar-brand col-md-1 control-label">Status</label>
+                <div class="col-md-1">
+                    <input type="text" name="status" value="" id="inputStatus" placeholder="請輸入整數" class="form-control input-md">
+                    </input>
+                </div>
+                <label for="inputMessage" class="navbar-brand col-md-1 control-label">Message</label>
+                <div class="col-md-4">
+                    <input type="text" name="msg" value="" id="inputMessage" placeholder="Event Messages" class="form-control input-md">
+                    </input>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn" name="save">Save</button>
+                </div>
+            </div>
+        </form> 
+        <form id="singular-create" style="margin-top: 24px" action="" method="post" class="form-inline" enctype="multipart/form-data">
+            <div class="form-group"> <input type="file" name="bf" id="bf" > </div>
+            <button type="submit" name="bsubmit" class="btn btn-default">Batch Upload</button>
+        </form>
+        <div class="dropdown pull-right">
+            <button onclick="myFunction()" class="dropbtn">Sample Txt.</button>
+            <div id="myDropdown" class="dropdown-content">
+                <"Lang">[, <"Status">[, <"Message">]]<br>
+                #Example-Insert or Update One<br>
+                zh_CN, 1, Motion<br>
+                #Example-Delete One Status<br>
+                -zh_CN, 1[, Motion]<br>
+                #Example-Delete One Language<br>
+                -zh_CN<br>
+                #Note<br>
+                #Language, Status Code(Not required while delete one lang), Message(Not required)<br>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <tr >
+                <th class="col-md-2">Lang. ({{.Count}}/{{.Total}})</th>
+                <th class="col-md-1">Status (171)</th>
+                <th class="col-md-9">Message</th>
+            </tr>
+            {{ range .Data}}
+            <tr >
+                <td >
+                    {{ if $writable }}
+                    <span class="btn-link glyphicon glyphicon-remove-circle" onclick="document.location.href='?lang={{.LangType}}&status={{.Status}}&active=del'">
+                    </span>
+                    {{ end }}
+                    &nbsp;&nbsp;{{.LangType}}
+                </td>
+                <td >{{.Status}}</td>
+                <td >{{.Message}}</td>
+            </tr>
+            {{ end }}
+        </table>
+    <script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+        return false;
+    }
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+    </script>
+    </body>
+</html>

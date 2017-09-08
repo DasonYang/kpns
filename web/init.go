@@ -23,6 +23,8 @@ type Permission struct {
 
 }
 
+var PermissionGroups []string
+
 var Permissions = make(map[string]map[string]Permission)
 
 var (
@@ -54,7 +56,11 @@ func Init(dbc database.DatabaseClient) error {
         log.Fatalf("Unmarshal: %v", err)
     }
 
-    fmt.Printf("Permissions = %v\n", Permissions)
+    for group := range Permissions {
+        PermissionGroups = append(PermissionGroups, group)
+    }
+
+    // fmt.Printf("Permissions = %v\n", Permissions)
 
     return nil
 }

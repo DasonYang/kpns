@@ -21,6 +21,7 @@ type DatabaseClient interface {
     Delete(string,string,map[string]interface{}) error
     Count(string, string, map[string]interface{}) int
     BulkWrite(string, string, []interface{}) error
+    Update(string, string, map[string]interface{}, map[string]interface{}) error
 }
 
 func NewDB(cfg config.CfgYaml) DatabaseClient {

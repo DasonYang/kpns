@@ -15,7 +15,7 @@ import (
 
 )
 
-var validBatchFile = regexp.MustCompile(`^-?[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]*\s*(?:,\s*[\w]*)?\s*$`)
+var validBatchFile = regexp.MustCompile(`^-?[A-Z0-9]{20}\s*,\s*[\d]{4}/[\d]{1,2}/[\d]{1,2}\s*,\s*[\w]+\s*(?:,\s*[\w]+)?\s*$`)
 
 type AllowData struct {
     UID     string
@@ -24,74 +24,8 @@ type AllowData struct {
     Note    string
 }
 
-// func genInput(limit, page int, note string, query map[string]interface{}, success bool, writable bool) map[string]interface{} {
-//     //fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
-//     var input = make(map[string]interface{})
-//     var params = make(map[string]interface{})
-//     var allowList []AllowData
-//     pageIdx := page
-//     displayLimit := limit
-
-//     if limit < 20 {displayLimit = 20}
-//     if page == 0 {pageIdx = 1}
-
-//     params["skip"] = (pageIdx-1)*displayLimit
-//     params["limit"] = displayLimit
-
-//     // fmt.Printf("params = %v\n", params)
-
-//     qs, count := dbClient.ReadAll(db_name, "allow", query, params)
-
-//     for _, allow := range qs {
-//         var data AllowData
-//         if str, f := allow["key"].(string); f{data.UID = str}
-
-//         value := allow["value"].(map[string]interface{})
-
-//         if str, f := value["update_time"].(string); f {data.Updated = str}
-        
-//         if ts, f := value["limit"].(float64); f {
-//             tm := time.Unix(int64(ts), 0)
-//             data.Limit = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-//         }
-
-//         if ts, f := value["limit"].(int); f {
-//             tm := time.Unix(int64(ts), 0)
-//             data.Limit = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-//         }
-        
-//         if str, f := value["note"].(string); f {data.Note = str}
-        
-//         // fmt.Printf("type of limit = %v\n", reflect.TypeOf(value["limit"]))
-//         allowList = append(allowList, data)
-//     }
-
-//     // fmt.Printf("count = %v\n", count)
-
-//     input["Data"] = allowList
-//     input["Page"] = pageIdx
-//     input["Count"] = count
-//     input["Limit"] = displayLimit
-//     input["HasNote"] = true
-//     input["Note"] = note
-//     input["Success"] = success
-//     input["Writable"] = writable
-
-//     if pageIdx > 1 {
-//         input["HasPre"] = true
-//         input["Pre"] = pageIdx-1
-//     }
-//     if (pageIdx * displayLimit) < count {
-//         input["HasNext"] = true
-//         input["Next"] = pageIdx + 1
-//     }
-
-//     return input
-// }
-
 func AllowHandler(w http.ResponseWriter, r *http.Request) {
 
-    // username, password, ok := r.BasicAuth()
     fmt.Println("================================Allow=================================", r.Context().Value("Writable"))
     var writable = r.Context().Value("Writable").(bool)
     var query = make(map[string]interface{})
@@ -127,9 +61,7 @@ func AllowHandler(w http.ResponseWriter, r *http.Request) {
             if ts, f := value["limit"].(float64); f {
                 tm := time.Unix(int64(ts), 0)
                 data.Limit = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-            }
-
-            if ts, f := value["limit"].(int); f {
+            } else if ts, f := value["limit"].(int); f {
                 tm := time.Unix(int64(ts), 0)
                 data.Limit = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
             }

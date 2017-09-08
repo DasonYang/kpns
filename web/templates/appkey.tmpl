@@ -6,6 +6,7 @@
         <title >&nbsp;&nbsp;App Key Editor</title>
     </head>
     <body>
+        {{ $writable := .Writable }}
         <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
             <h2 style="cursor:pointer">&nbsp;&nbsp;<span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;App Key Editor<small >&nbsp;&nbsp;&nbsp;&nbsp;Search all appid and appkey </small>
             </h2>
@@ -13,22 +14,33 @@
         <div id='bar' style='display:none;' onMouseOver="document.getElementById('bar').style.display='';" onMouseOut="document.getElementById('bar').style.display='none';">
             <div  class="alert alert-info col-md-12">
                 <center >
-                    <span class="glyphicon glyphicon-search" style="cursor:pointer" onclick="document.location.href='search'"> Search</span>
+                    <span class="glyphicon glyphicon-search" style="cursor:pointer" onclick="document.location.href='search'">
+                     Search
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-list-alt" style="cursor:pointer" onclick="document.location.href='log'"> Logs</span>
+                    <span class="glyphicon glyphicon-list-alt" style="cursor:pointer" onclick="document.location.href='log'">
+                     Logs
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-globe" style="cursor:pointer" onclick="document.location.href='lang'"> Language</span>
+                    <span class="glyphicon glyphicon-globe" style="cursor:pointer" onclick="document.location.href='lang'">
+                     Language
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'"> Allow</span>
+                    <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'">
+                     Allow
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-tag" style="cursor:pointer" onclick="document.location.href='tag'"> Tag</span>
+                    <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'">
+                     Account
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-cloud" style="cursor:pointer" onclick="document.location.href='s3'"> S3</span>
+                    <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'">
+                     Trace
+                    </span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'"> Account</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'"> Trace</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'"> Logout</span>
+                    <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'">
+                     Logout
+                    </span>
                 </center>
             </div>
             <div  class="col-md-12">&nbsp;</div>
@@ -50,9 +62,11 @@
                 <div class="col-md-1">
                     <button class="btn btn-primary" name="search">Search</button>
                 </div>
+                {{ if $writable }}
                 <div class="col-md-1">
                     <button class="btn " name="save">Save</button>
                 </div>
+                {{ end }}
             </div>
         </form>
         <table class="table table-striped" style="table-layout:fixed;">
@@ -62,7 +76,6 @@
                 <th class="col-md-1">Count</th>
                 <th class="col-md-1">Last</th>
             </tr>
-            {{ $writable := .Writable }}
             {{ range .Data}}
             <tr >
                 <td >

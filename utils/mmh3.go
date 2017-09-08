@@ -156,7 +156,7 @@ func Hash128(data string) string {
 
     h1, h2 := murmur3.Sum128([]byte(data))
 
-    log.Printf("h1 = %v, h2 = %v\n", h1, h2)
+    // log.Printf("h1 = %v, h2 = %v\n", h1, h2)
 
     b1 := make([]byte, 8)
     binary.LittleEndian.PutUint64(b1, h1)
@@ -165,6 +165,8 @@ func Hash128(data string) string {
     binary.LittleEndian.PutUint64(b2, h2)
 
     b := append(b1, b2...)
+
+    log.Printf("b = %v\n", b)
 
     var pstartbyte []byte = b
     var pendbyte []byte = b[15:]

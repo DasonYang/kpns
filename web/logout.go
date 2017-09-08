@@ -16,7 +16,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
         if value, ok := userData["value"]; ok {
 
-
+            
             value.(map[string]interface{})["token"] = ""
             userData["value"] = value
             dbClient.Write(db_name, "account", userData)

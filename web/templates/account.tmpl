@@ -1,0 +1,122 @@
+<html >
+    <head >
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="shortcut icon" href="/static/favicon.ico">
+        <title >&nbsp;&nbsp;Account Management</title>
+    </head>
+    <body onload="showMsg()">
+        <div class="page-header" onclick="document.location.href='?'" onMouseOver="document.getElementById('bar').style.display='';">
+            <h2 style="cursor:pointer">&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-th"></span>
+                &nbsp;&nbsp;Account Management<small >&nbsp;&nbsp;&nbsp;&nbsp;Manage All User Account </small>
+            </h2>
+        </div>
+        <div id='bar' style='display:none;' onMouseOver="document.getElementById('bar').style.display='';" onMouseOut="document.getElementById('bar').style.display='none';">
+            <div  class="alert alert-info col-md-12">
+                <center >
+                    <span class="glyphicon glyphicon-search" style="cursor:pointer" onclick="document.location.href='search'">
+                     Search
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-list-alt" style="cursor:pointer" onclick="document.location.href='log'">
+                     Logs
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-globe" style="cursor:pointer" onclick="document.location.href='lang'">
+                     Language
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-lock" style="cursor:pointer" onclick="document.location.href='appkey'">
+                     AppKey
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="document.location.href='allow'">
+                     Allow
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'">
+                     Trace
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-log-out" style="cursor:pointer" onclick="document.location.href='logout'">
+                     Logout
+                    </span>
+                </center>
+            </div>
+            <div  class="col-md-12">&nbsp;</div>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="form-horizontal" role="form" autocomplete="off">
+            <div class="form-group">
+                <label for="inputLimit" class="navbar-brand col-md-1 control-label">Limit</label>
+                <div class="col-md-1">
+                    <input type="text" name="limit" value="20" id="inputLimit" class="form-control"></input>
+                </div>
+                <label for="inputAccount" class="navbar-brand col-md-1 control-label">Account</label>
+                <div class="col-md-1">
+                    <input type="text" name="account" value="" id="inputAccount" placeholder="" class="form-control"></input>
+                </div>
+                <label for="inputSecure" class="navbar-brand col-md-1 control-label">Passwd</label>
+                <div class="col-md-1">
+                    <input type="text" name="secure" value="" id="inputSecure" placeholder="" class="form-control"></input>
+                </div>
+                <label for="inputMode" class="navbar-brand col-md-1 control-label">Mode</label>
+                <div class="col-md-2">
+                    <!-- <input type="text" name="mode" value="" id="inputMode" class="form-control"></input> -->
+                    <select id="inputMode" name="mode" class="form-control">
+                        <option value=""></option>
+                        {{ range .Perms}}
+                        <option value={{.}} id={{.}}>{{.}}</option>
+                        {{ end }}
+                        
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <button class="btn btn-primary" name="search">Search</button>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn " name="save">Save</button>
+                </div>
+            </div>
+        </form>
+        <table class="table table-striped" style="table-layout:fixed;">
+            <tr >
+                <th class="col-md-2">User</th>
+                <th class="col-md-5">Mode</th>
+                <th class="col-md-2">Last Time</th>
+                <th class="col-md-2">First Time</th>
+                <th class="col-md-1">Count</th>
+            </tr>
+            {{ $writable := .Writable }}
+            {{ range .Data}}
+            <tr >
+                <td >
+                    {{ if $writable }}
+                    <span class="btn-link glyphicon glyphicon-remove-circle" onclick="if(confirm(&quot;確定刪除？&quot;)==true){document.location.href='?account={{.User}}&active=del';};"></span>
+                    {{ end }}
+                    &nbsp;&nbsp;{{.User}}
+                </td>
+                <td >{{.Mode}}</td>
+                <td >{{.LastTime}}</td>
+                <td >{{.FirstTime}}</td>
+                <td >{{.Count}}</td>
+            </tr>
+            {{ end }}
+        </table>
+        <center >
+            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">&lt;&lt;Previous Page</a>{{ end }}
+             { {{.Page}} }
+            {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">Next Page &gt;&gt;</a>{{ end }}
+        </center>
+    <script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function showMsg() {
+        {{if .Success}}
+        alert("{{.Msg}}");
+        {{end}}
+    }
+    </script>
+    </body>
+</html>

@@ -8,7 +8,7 @@ admin:
   appkey:
     readable: true
     writable: true
-  language:
+  lang:
     readable: true
     writable: true
   log:
@@ -27,7 +27,7 @@ all:
   appkey:
     readable: true
     writable: true
-  language:
+  lang:
     readable: true
     writable: true
   log:
@@ -46,7 +46,7 @@ mis:
   appkey:
     readable: true
     writable: true
-  language:
+  lang:
     readable: true
     writable: true
   log:
@@ -59,7 +59,7 @@ fae:
   appkey:
     readable: true
     writable: true
-  language:
+  lang:
     readable: true
     writable: true
   log:

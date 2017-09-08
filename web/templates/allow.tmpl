@@ -60,10 +60,6 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span class="glyphicon glyphicon-lock" style="cursor:pointer" onclick="document.location.href='appkey'"> AppKey</span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-tag" style="cursor:pointer" onclick="document.location.href='tag'"> Tag</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="glyphicon glyphicon-cloud" style="cursor:pointer" onclick="document.location.href='s3'"> S3</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span class="glyphicon glyphicon-user" style="cursor:pointer" onclick="document.location.href='account'"> Account</span>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span class="glyphicon glyphicon-screenshot" style="cursor:pointer" onclick="document.location.href='trace'"> Trace</span>
@@ -73,7 +69,7 @@
             </div>
             <div  class="col-md-12">&nbsp;</div>
         </div>
-        <form method="post" enctype="multipart/form-data" class="form-horizontal" role="form">
+        <form method="post" enctype="multipart/form-data" class="form-horizontal" role="form" action="/allow">
             <div class="form-group">
                 <center >
                     <b >
@@ -91,7 +87,7 @@
                 </center>
                 <div class="col-md-12"></div>
                 <div class="col-md-1">
-                    <input type="text" name="limit" value="20" id="" class="form-control" placeholder=""></input>
+                    <input type="text" name="limit" value="{{.Limit}}" id="" class="form-control" placeholder=""></input>
                 </div>
                 <div class="col-md-2">
                     <input type="text" name="uid" value="" id="" class="form-control" placeholder="UID Length Need = 20"></input>
@@ -119,13 +115,13 @@
         <div class="dropdown pull-right">
             <button onclick="myFunction()" class="dropbtn">Sample Txt.</button>
             <div id="myDropdown" class="dropdown-content">
-                [UID1], [Limit Time], [Note], [Method]<br>
-                #範例-新增或修改<br>
+                <"UID">, <"Limit Time">, <"Note">[, <"Method">]<br>
+                #Example-Insert or update<br>
                 ABCDE12345FGHIJ67890, 2020/02/20, Test_Use<br>
-                #範例-刪除<br>
+                #Example-Delete<br>
                 -ABCDE12345FGHIJ67890, 2020/02/20, Test_Use<br>
-                #說明<br>
-                #UID20碼, yyyy/mm/dd (可使用至何時), 說明, 指定特殊模式(可不填)<br>
+                #‎Description<br>
+                #UID(20 characters), yyyy/mm/dd (Limit date), Note(Description), Mode(Not required)<br>
             </div>
         </div> 
         <table class="table table-striped" style="table-layout:fixed;">
@@ -170,6 +166,10 @@
     function myFunction() {
         document.getElementById("myDropdown").classList.toggle("show");
         return false;
+    }
+    function searchClick() {
+        window.location.href = "allow"
+        return true
     }
 
     // Close the dropdown if the user clicks outside of it
