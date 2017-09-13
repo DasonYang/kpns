@@ -1,168 +1,174 @@
 package web
 
 import (
-    // "log"
-    "fmt"
-    "time"
+	// "log"
+	"fmt"
+	"time"
 
-    "net/http"
-    "io/ioutil"
-    "html/template"
-    b64 "encoding/base64"
+	b64 "encoding/base64"
+	"html/template"
+	"io/ioutil"
+	"net/http"
 
-    "kpns/utils"
+	"kpns/utils"
 )
 
 type AppKeyData struct {
-    AppId       string
-    AppKey      string
-    Count       int
-    Last        string
+	AppId  string
+	AppKey string
+	Count  int
+	Last   string
 }
 
 func AppKeyHandler(w http.ResponseWriter, r *http.Request) {
 
-    // username, password, ok := r.BasicAuth()
-    fmt.Println("================================Appkey=================================", r.Context().Value("Writable"))
-    var writable = r.Context().Value("Writable").(bool)
-    var query = make(map[string]interface{})
+	// username, password, ok := r.BasicAuth()
+	fmt.Println("================================Appkey=================================", r.Context().Value("Writable"))
+	var writable = r.Context().Value("Writable").(bool)
+	var query = make(map[string]interface{})
 
-    genInput := func (query map[string]interface{}, success bool, writable bool) map[string]interface{} {
-        var input = make(map[string]interface{})
-        var appList []AppKeyData
+	genInput := func(query map[string]interface{}, success bool, writable bool) map[string]interface{} {
+		var input = make(map[string]interface{})
+		var appList []AppKeyData
 
-        qs, count := dbClient.ReadAll(db_name, "appkey", query, nil)
+		qs, count := dbClient.ReadAll(db_name, "appkey", query, nil)
 
-        for _, appid := range qs {
-            var data AppKeyData
-            if str, f := appid["key"].(string); f{data.AppId = str}
+		for _, appid := range qs {
+			var data AppKeyData
+			if str, f := appid["key"].(string); f {
+				data.AppId = str
+			}
 
-            value := appid["value"].(map[string]interface{})
-            
-            if ts, f := value["lasttime"].(float64); f {
-                tm := time.Unix(int64(ts), 0)
-                data.Last = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-            } else if d, f := value["lasttime"].(string); f {
-                data.Last = d
-            }
+			value := appid["value"].(map[string]interface{})
 
-            if c, f := value["count"].(int); f { data.Count = c }
+			if ts, f := value["lasttime"].(float64); f {
+				tm := time.Unix(int64(ts), 0)
+				data.Last = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
+			} else if d, f := value["lasttime"].(string); f {
+				data.Last = d
+			}
 
-            if k, f := value["appkey"].(string); f { data.AppKey = k }
-            appList = append(appList, data)
-        }
+			if c, f := value["count"].(int); f {
+				data.Count = c
+			}
 
-        input["Data"] = appList
-        input["Count"] = count
-        input["Success"] = success
-        input["Writable"] = writable
+			if k, f := value["appkey"].(string); f {
+				data.AppKey = k
+			}
+			appList = append(appList, data)
+		}
 
-        return input
-    }
+		input["Data"] = appList
+		input["Count"] = count
+		input["Success"] = success
+		input["Writable"] = writable
 
-    t, err := template.ParseFiles(TemplatePath+"/appkey.tmpl")
-    if err != nil {
-        fmt.Printf("Error = %v\n", err)
-        panic(err)
-    }
+		return input
+	}
 
-    if r.Method == "GET" {
-        fmt.Println("================================Appkey.GET=================================")
-        var appId, active string
-        for key, value := range r.URL.Query() {
-            // fmt.Printf("key = %v, value = %v\n", key, value)
-            switch key {
-            case "id":
-                appId = value[0]
-            case "active":
-                active = value[0]
-            case "key":
-                // key = value[0]
-            }
-        }
+	t, err := template.ParseFiles(TemplatePath + "/appkey.tmpl")
+	if err != nil {
+		fmt.Printf("Error = %v\n", err)
+		panic(err)
+	}
 
-        if active == "del" {
-            err := dbClient.Delete(db_name, "appkey", map[string]interface{}{"key":appId})
-            if err != nil {
-                panic(err)
-            }
-        }
+	if r.Method == "GET" {
+		fmt.Println("================================Appkey.GET=================================")
+		var appId, active string
+		for key, value := range r.URL.Query() {
+			// fmt.Printf("key = %v, value = %v\n", key, value)
+			switch key {
+			case "id":
+				appId = value[0]
+			case "active":
+				active = value[0]
+			case "key":
+				// key = value[0]
+			}
+		}
 
-        input := genInput(query, false, writable)
+		if active == "del" {
+			err := dbClient.Delete(db_name, "appkey", map[string]interface{}{"key": appId})
+			if err != nil {
+				panic(err)
+			}
+		}
 
-        t.Execute(w, input)
-    } else {
-        fmt.Println("================================Allow.POST=================================")
-        r.ParseMultipartForm(0)
-        var appkey, appId string
+		input := genInput(query, false, writable)
 
-        for key, value := range r.PostForm {
-            switch key {
-            case "id":
-                appId = value[0]
-            case "key":
-                appkey = value[0]
-            }
-        }
+		t.Execute(w, input)
+	} else {
+		fmt.Println("================================Allow.POST=================================")
+		r.ParseMultipartForm(0)
+		var appkey, appId string
 
-        if _, ok := r.PostForm["search"]; ok {// Search clicked
-            var or_query []map[string]interface{}
-            
-            if len(appId) > 0 {
-                or_query = append(or_query, map[string]interface{}{"key":appId})
-            }
-            if len(appkey) > 0 {
-                or_query = append(or_query, map[string]interface{}{"value.appkey":appkey})
-            }
+		for key, value := range r.PostForm {
+			switch key {
+			case "id":
+				appId = value[0]
+			case "key":
+				appkey = value[0]
+			}
+		}
 
-            query["$or"] = or_query
-        } else if _, ok := r.PostForm["save"]; ok && len(appId) > 0 {// Save clicked
-            var data = map[string]interface{}{"key":appId}
-            file, _, _ := r.FormFile("File")
+		if _, ok := r.PostForm["search"]; ok { // Search clicked
+			var or_query []map[string]interface{}
 
-            if file != nil { // iOS pem
-                defer file.Close()
+			if len(appId) > 0 {
+				or_query = append(or_query, map[string]interface{}{"key": appId})
+			}
+			if len(appkey) > 0 {
+				or_query = append(or_query, map[string]interface{}{"value.appkey": appkey})
+			}
 
-                dat, err := ioutil.ReadAll(file)
+			query["$or"] = or_query
+		} else if _, ok := r.PostForm["save"]; ok && len(appId) > 0 { // Save clicked
+			var data = map[string]interface{}{"key": appId}
+			file, _, _ := r.FormFile("File")
 
-                if err != nil {
-                    fmt.Printf("Read file with err = %v\n", err)
-                }
+			if file != nil { // iOS pem
+				defer file.Close()
 
-                sEnc := b64.StdEncoding.EncodeToString(dat)
-                strToHash := appkey+"@"+sEnc
-                sHash := utils.Hash128(strToHash)
+				dat, err := ioutil.ReadAll(file)
 
-                appkey = appkey + "@" + sHash
+				if err != nil {
+					fmt.Printf("Read file with err = %v\n", err)
+				}
 
-                appkeyfile := map[string]interface{}{"key":sHash, "value":sEnc}
-                dbClient.Write(db_name, "appkeyfile", appkeyfile)
-                
-            }
+				sEnc := b64.StdEncoding.EncodeToString(dat)
+				strToHash := appkey + "@" + sEnc
+				sHash := utils.Hash128(strToHash)
 
-            if len(appkey) > 0 {
-                app := dbClient.ReadOne(db_name, "appkey", map[string]interface{}{"key":appId})
-                value := make(map[string]interface{})
+				appkey = appkey + "@" + sHash
 
-                if val, ok := app["value"]; ok { // If data exists
-                    if _, match := val.(map[string]interface{}); match {
-                        value = val.(map[string]interface{})
-                    }
-                } else {
-                    value["first_time"] = int32(time.Now().Unix())
-                }
+				appkeyfile := map[string]interface{}{"key": sHash, "value": sEnc}
+				dbClient.Write(db_name, "appkeyfile", appkeyfile, nil)
 
-                value["appkey"] = appkey
-                data["value"] = value
+			}
 
-                dbClient.Write(db_name, "appkey", data)
-                query["key"] = appId
-            }
+			if len(appkey) > 0 {
+				app := dbClient.ReadOne(db_name, "appkey", map[string]interface{}{"key": appId})
+				value := make(map[string]interface{})
 
-        }
+				if val, ok := app["value"]; ok { // If data exists
+					if _, match := val.(map[string]interface{}); match {
+						value = val.(map[string]interface{})
+					}
+				} else {
+					value["first_time"] = int32(time.Now().Unix())
+				}
 
-        input := genInput(query, true, writable)
+				value["appkey"] = appkey
+				data["value"] = value
 
-        t.Execute(w, input)
-    }
+				dbClient.Write(db_name, "appkey", data, nil)
+				query["key"] = appId
+			}
+
+		}
+
+		input := genInput(query, true, writable)
+
+		t.Execute(w, input)
+	}
 }

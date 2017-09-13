@@ -1,244 +1,205 @@
 package web
 
-import(
-    "fmt"
-    // "strconv"
-    "net/http"
-    "html/template"
+import (
+	"fmt"
+	"html/template"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
+// LogData : Log data format
 type LogData struct {
-    DateTime        string
-    Status          string
-    Content         string
-
+	DateTime string
+	Status   string
+	Content  string
 }
 
+// LogHandler - Log handler
 func LogHandler(w http.ResponseWriter, r *http.Request) {
 
-    fmt.Println("================================Account=================================", r.Context().Value("Writable"))
-    // var writable = r.Context().Value("Writable").(bool)
-    // var query = make(map[string]interface{})
-    // var pageIdx, limit int
-    // // var account string
-    // var resultMsg string
-    // var popAnalog bool
-    // getInput
-    // genInput := func(limit, page int, query map[string]interface{}, success bool, msg string, writable bool) map[string]interface{} {
-    //     //fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
-    //     var input = make(map[string]interface{})
-    //     var params = make(map[string]interface{})
-    //     var accountList []AccountData
-    //     pageIdx := page
-    //     displayLimit := limit
+	fmt.Println("================================Account=================================", r.Context().Value("Writable"))
+	var writable = r.Context().Value("Writable").(bool)
+	var query = make(map[string]interface{})
+	var pageIdx, limit int
+	// // var account string
+	var resultMsg string
+	var popDialog bool
+	// getInput
+	genInput := func(args map[string]interface{}) map[string]interface{} {
+		var input = make(map[string]interface{})
+		var params = make(map[string]interface{})
+		var logList []LogData
+		pageIdx := args["page"].(int)
+		displayLimit := args["limit"].(int)
+		query := args["query"].(map[string]interface{})
 
-    //     if limit < 20 {displayLimit = 20}
-    //     if page == 0 {pageIdx = 1}
+		if limit < 20 {
+			displayLimit = 20
+		}
+		if pageIdx == 0 {
+			pageIdx = 1
+		}
 
-    //     params["skip"] = (pageIdx-1)*displayLimit
-    //     params["limit"] = displayLimit
+		params["skip"] = (pageIdx - 1) * displayLimit
+		params["limit"] = displayLimit
+		params["sort"] = "-$natural"
 
-    //     // fmt.Printf("params = %v\n", params)
+		qs, count := dbClient.ReadAll(db_name, "logs", query, params)
 
-    //     qs, count := dbClient.ReadAll(db_name, "account", query, params)
+		for _, log := range qs {
+			var data LogData
+			value := log["value"].(map[string]interface{})
 
-    //     for _, allow := range qs {
-    //         var data AccountData
-    //         if str, f := allow["key"].(string); f{data.User = str}
+			if str, f := value["date"].(string); f {
+				var processTime float64
+				if tm, g := value["time"].(float64); g {
+					processTime = tm
+				}
+				data.DateTime = fmt.Sprintf("%v(%.2f)", str, processTime)
+			} else if t, f := value["date"].(time.Time); f {
+				var processTime float64
+				if tm, g := value["time"].(float64); g {
+					processTime = tm
+				}
+				data.DateTime = fmt.Sprintf("%v(%.2f)", t.Format("2006-01-02 15:04:05"), processTime)
+			}
 
-    //         value := allow["value"].(map[string]interface{})
+			if str, f := value["status"].(string); f {
+				var hostIP = "__"
+				if h, g := value["host"]; g {
+					hostIP = fmt.Sprintf("%v", h)
+				}
+				data.Status = fmt.Sprintf("%v > %v", str, hostIP)
+			}
 
-    //         if str, f := value["last"].(string); f {
-    //             data.LastTime = str
-    //         } else if ts, f := value["last"].(float64); f {
-    //             tm := time.Unix(int64(ts), 0)
-    //             data.LastTime = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-    //         } else if ts, f := value["last"].(int); f {
-    //             tm := time.Unix(int64(ts), 0)
-    //             data.LastTime = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-    //         }
-            
-    //         if str, f := value["first"].(string); f {
-    //             data.FirstTime = str
-    //         } else if ts, f := value["first"].(float64); f {
-    //             tm := time.Unix(int64(ts), 0)
-    //             data.FirstTime = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-    //         } else if ts, f := value["first"].(int); f {
-    //             tm := time.Unix(int64(ts), 0)
-    //             data.FirstTime = fmt.Sprintf("%v", tm.Format("2006-01-02 15:04:05"))
-    //         }
-            
-    //         if str, f := value["mode"].(string); f {data.Mode = str}
-    //         if cnt, f := value["count"].(int); f {data.Count = cnt}
-            
-    //         // fmt.Printf("type of limit = %v\n", reflect.TypeOf(value["limit"]))
-    //         accountList = append(accountList, data)
-    //     }
+			if msg, f := value["msg"].(string); f {
+				var address = "NoIP"
 
-    //     // fmt.Printf("count = %v\n", count)
+				if addr, g := value["address"].(string); g {
+					address = addr
+				}
+				data.Content = fmt.Sprintf("%v @ %v >> %v", msg, address, value["data"])
+				data.Content = strings.Replace(data.Content, "map", "", -1)
+			}
 
-    //     fmt.Printf("PermissionGroups = %v\n", PermissionGroups)
+			logList = append(logList, data)
+		}
 
-    //     input["Data"] = accountList
-    //     input["Page"] = pageIdx
-    //     input["Count"] = count
-    //     input["Limit"] = displayLimit
-    //     input["Success"] = success
-    //     input["Writable"] = writable
-    //     input["User"] = ""
-    //     input["Pswd"] = ""
-    //     input["Perms"] = PermissionGroups
-    //     input["Msg"] = msg
+		input["Data"] = logList
+		input["Page"] = pageIdx
+		input["Count"] = count
+		input["Limit"] = displayLimit
+		input["Success"] = args["needPop"].(bool)
+		input["Writable"] = args["writable"].(bool)
+		input["Msg"] = args["popMsg"].(string)
+		input["To"] = args["to"].(string)
+		input["Ip"] = args["ip"].(string)
+		input["Status"] = args["status"].(string)
+		input["Text"] = args["text"].(string)
 
-    //     if pageIdx > 1 {
-    //         input["HasPre"] = true
-    //         input["Pre"] = pageIdx-1
-    //     }
-    //     if (pageIdx * displayLimit) < count {
-    //         input["HasNext"] = true
-    //         input["Next"] = pageIdx + 1
-    //     }
+		fromStr := args["from"].(string)
+		if len(fromStr) > 0 {
+			input["From"] = fromStr
+		} else {
+			yesterday := time.Now().AddDate(0, 0, -1)
+			input["From"] = yesterday.Format("2006/01/02 15:04:05")
+		}
 
-    //     return input
-    // }
-    // genInput
-    t, err := template.ParseFiles(TemplatePath+"/log.tmpl")
-    if err != nil {
-        fmt.Printf("Error = %v\n", err)
-        panic(err)
-    }
+		if pageIdx > 1 {
+			input["HasPre"] = true
+			input["Pre"] = pageIdx - 1
+		}
+		if (pageIdx * displayLimit) < count {
+			input["HasNext"] = true
+			input["Next"] = pageIdx + 1
+		}
 
-    if r.Method == "GET" {
-        // fmt.Println("================================Account.GET=================================")
-        // var active string
-        // for key, value := range r.URL.Query() {
-        //     fmt.Printf("key = %v, value = %v\n", key, value)
-        //     switch key {
-        //     case "page":
-        //         pageIdx, _ = strconv.Atoi(value[0])
-        //     case "limit":
-        //         limit, _ = strconv.Atoi(value[0])
-        //     case "active":
-        //         active = value[0]
-        //     case "account":
-        //         account = value[0]
-        //     }
-        // }
+		return input
+	}
+	// genInput
+	t, err := template.ParseFiles(TemplatePath + "/log.tmpl")
+	if err != nil {
+		fmt.Printf("Error = %v\n", err)
+		panic(err)
+	}
 
-        // if active == "del" {
-        //     err := dbClient.Delete(db_name, "account", map[string]interface{}{"key":account})
-        //     if err != nil {
-        //         log.Println(err)
-        //     }
-        // }
+	if r.Method == "GET" {
+		fmt.Println("================================Log.GET=================================")
+		var keyRange = make(map[string]interface{})
+		var args = map[string]interface{}{"page": 0, "limit": 0, "from": "", "to": "", "ip": "", "text": "", "status": ""}
+		layout := "2006/01/02 15:04:05"
+		for key, value := range r.URL.Query() {
+			fmt.Printf("key = %v, value = %v\n", key, value)
+			switch key {
+			case "page":
+				pageIdx, _ = strconv.Atoi(value[0])
+			case "limit":
+				limit, _ = strconv.Atoi(value[0])
+			case "from":
+				fromStr := value[0]
 
-        // input := genInput(limit, pageIdx, query, popAnalog, resultMsg, writable)
+				if len(fromStr) > 0 {
+					fromDate, err := time.Parse(layout, fromStr)
+					fmt.Printf("err = %v\n", err)
 
-        t.Execute(w, nil)
-    } else {
-        fmt.Println("================================Log.POST=================================")
-        r.ParseMultipartForm(0)
+					keyRange["$gte"] = fromDate
+					fmt.Printf("fromDate = %v\n", fromDate)
+				}
+				args["from"] = fromStr
+			case "to":
+				toStr := value[0]
+				if len(toStr) > 0 {
+					toDate, err := time.Parse(layout, toStr)
+					fmt.Printf("err = %v\n", err)
 
-        // var mode string
-        // var pswd string
-        // for key, value := range r.PostForm {
-        //     fmt.Printf("key = %v, value = %v\n", key, value)
-        //     switch key {
-        //     case "limit":
-        //         limit, _ = strconv.Atoi(value[0])
-        //     case "account":
-        //         account = strings.TrimSpace(value[0])
-        //     case "secure":
-        //         pswd = strings.TrimSpace(value[0])
-        //         fmt.Printf("pswd = %v\n", pswd)
-        //     case "mode":
-        //         mode = strings.TrimSpace(value[0])
+					keyRange["$lte"] = toDate
+					fmt.Printf("toDate = %v\n", toDate)
+				}
+				args["to"] = toStr
+			case "text":
+				txtStr := value[0]
+				if len(txtStr) > 0 {
 
-        //         if _, ok := Permissions[mode]; !ok {
-        //             mode = "default"
-        //         }
-        //         fmt.Printf("mode = %v\n", mode)
-        //     }
-        // }
-        
-        // if _, ok := r.PostForm["search"]; ok {// Search clicked
-        //     if limit < 20 {limit = 20}
-        //     if pageIdx == 0 {pageIdx = 1}
+				}
+				args["text"] = txtStr
+			case "status":
+				status := value[0]
 
-        //     if len(account) > 0 {
-        //         query["key"] = map[string]interface{}{"$regex":account}
-        //     }
-        // } else if _, ok := r.PostForm["save"]; ok {// Save clicked
+				if len(status) > 0 {
+					query["value.status"] = map[string]interface{}{"$regex": status}
+				}
 
-        //     if len(account) > 0 && len(pswd) > 0 {
+				args["status"] = status
+			case "ip":
+				ipStr := value[0]
 
-        //         count := dbClient.Count(db_name, "account", map[string]interface{}{"key":account})
+				if len(ipStr) > 0 {
+					query["value.address"] = map[string]interface{}{"$regex": ipStr}
+				}
+				args["ip"] = ipStr
+			}
+		}
 
-        //         if count == 0 {
-        //             var encPswd, savedPasswd string
-        //             query["key"] = account
+		if len(keyRange) > 0 {
+			query["key"] = keyRange
+		}
 
-        //             encPswd = base64.StdEncoding.EncodeToString([]byte(pswd))
+		args["page"] = pageIdx
+		args["limit"] = limit
+		args["query"] = query
+		args["needPop"] = popDialog
+		args["popMsg"] = resultMsg
+		args["writable"] = writable
 
-        //             genPswd := func(account, password string) string {
-        //                 h := md5.New()
-        //                 io.WriteString(h, account)
-        //                 io.WriteString(h, password)
-        //                 return hex.EncodeToString(h.Sum(nil))
-        //             }
+		input := genInput(args)
 
-        //             if strings.Contains(account, "@") {
-        //                 realPassword := genPswd(account, strconv.Itoa(int(time.Now().Unix())))
-        //                 fmt.Printf("realPassword = %v\n", realPassword)
-        //                 encPswd = base64.StdEncoding.EncodeToString([]byte(realPassword))
-        //                 {
+		t.Execute(w, input)
+	} else {
+		fmt.Println("================================Log.POST=================================")
+		r.ParseMultipartForm(0)
 
-        //                     auth := utils.NewLoginAuth(KALAY_USER, KALAY_PASSWORD)
-
-        //                     to := []string{account}
-        //                     msg := []byte(fmt.Sprintf(mail_body, account, realPassword))
-        //                     err := utils.SendMail("outlook-apacsouth.office365.com:587", auth, KALAY_USER, to, msg)
-        //                     if err != nil {
-        //                         log.Println("with err:", err)
-        //                     }
-        //                     fmt.Println("please check mailbox")
-        //                 }
-
-        //             } else {
-        //                 encPswd = base64.StdEncoding.EncodeToString([]byte(pswd))
-        //             }
-
-        //             savedPasswd = genPswd(account, encPswd)
-        //             fmt.Printf("savedPasswd = %v\n", savedPasswd)
-        //             info := make(map[string]interface{})
-        //             info["key"] = account
-        //             data := make(map[string]interface{})
-        //             data["pswd"] = savedPasswd
-        //             data["mode"] = mode
-        //             data["first"] = int32(time.Now().Unix())
-        //             info["value"] = data
-
-        //             dbClient.Write(db_name, "account", info)
-
-                    
-
-        //             query["key"] = account
-        //         } else {
-        //             popAnalog = true
-        //             resultMsg = "Account exists."
-        //         }
-
-        //         // info := map[string]interface{}{"key":account}
-        //         // data := make(map[string]interface{})
-        //         // data["first"] = time.Now().Format("2006-01-02 15:04:05")
-        //         // data["mode"] = mode
-        //         // info["pswd"] = data
-        //         // dbClient.Write(db_name, "account", info)
-        //     }
-        // }
-
-        // input := genInput(limit, pageIdx, query, popAnalog, resultMsg, writable)
-
-        t.Execute(w, nil)
-    }
+		t.Execute(w, nil)
+	}
 }
