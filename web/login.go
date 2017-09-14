@@ -63,7 +63,7 @@ func checkAccount(username, password string) (string, string) {
 				//     mode = val
 				// }
 				ret["value"] = value
-				dbClient.Write("tpns", "account", ret, nil)
+				dbClient.Write(dbName, "account", ret, nil)
 
 				return token, mode
 			}
@@ -75,6 +75,7 @@ func checkAccount(username, password string) (string, string) {
 	return "", ""
 }
 
+// LoginHandler - Handle login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("================================Login=================================")
 	if r.Method == "GET" {
@@ -88,7 +89,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//     info["Type"] = MessageType_Warning
 		//     info["Message"] = msg
 		// }
-		t, err := template.ParseFiles(TemplatePath + "/login.tmpl")
+		t, err := template.ParseFiles(templatePath + "/login.tmpl")
 		if err != nil {
 			fmt.Printf("Error = %v\n", err)
 			panic(err)
@@ -117,7 +118,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			//     info["Message"] = msg
 			// }
 
-			t, err := template.ParseFiles(TemplatePath + "/login.tmpl")
+			t, err := template.ParseFiles(templatePath + "/login.tmpl")
 			if err != nil {
 				fmt.Printf("Error = %v\n", err)
 				panic(err)
@@ -125,7 +126,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			t.Execute(w, info)
 		} else {
 			// Login success
-			var redirect string = "/search"
+			var redirect = "/search"
 			for key, value := range r.URL.Query() {
 				switch key {
 				case "next":

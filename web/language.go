@@ -12,59 +12,60 @@ import (
 
 var validLangBatchFile = regexp.MustCompile(`^-?[A-Za-z-_]*\s*(?:,\s*[\d]+\s*(?:,\s*[\w]+\s*)?)?$`)
 
-type LangData struct {
+type langTemplateInfo struct {
+	displayLimit int
+	pageIndex    int
+	writable     bool
+	query        map[string]interface{}
+	popDialog    bool
+	dialogMsg    string
+	lang         string
+}
+
+type langData struct {
 	LangType string
 	Status   string
 	Message  string
 }
 
-func LangHandler(w http.ResponseWriter, r *http.Request) {
+func (info langTemplateInfo) genInput() map[string]interface{} {
+	var input = make(map[string]interface{})
+	var langList []langData
+	total := dbClient.Count(dbName, "lang", nil)
+	qs, count := dbClient.ReadAll(dbName, "lang", info.query, nil)
 
-	// username, password, ok := r.BasicAuth()
+	for _, lang := range qs {
+		if str, f := lang["key"].(string); f {
+
+			value := lang["value"].(map[string]interface{})
+
+			for k, v := range value {
+				data := langData{}
+				data.LangType = str
+				data.Status = k
+				data.Message = v.(string)
+
+				langList = append(langList, data)
+			}
+		}
+	}
+
+	input["Data"] = langList
+	input["Count"] = count
+	input["Success"] = info.popDialog
+	input["Writable"] = info.writable
+	input["Total"] = total
+	input["Lang"] = info.lang
+
+	return input
+}
+
+// LangHandler -  Handle /lang
+func LangHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("================================Lang=================================", r.Context().Value("Writable"))
 	var writable = r.Context().Value("Writable").(bool)
-	var query = make(map[string]interface{})
-	var displayLang string
-	// getInput
-	genInput := func(lang string, query map[string]interface{}, success bool, writable bool) map[string]interface{} {
-		//fmt.Printf("limit = %v, page = %v, note = %v, query = %v\n", limit, page, note, query)
-		var input = make(map[string]interface{})
-		var langList []LangData
-
-		// fmt.Printf("params = %v\n", params)
-		total := dbClient.Count(db_name, "lang", nil)
-		qs, count := dbClient.ReadAll(db_name, "lang", query, nil)
-
-		// fmt.Printf("qs = %v, count = %v\n", qs, count)
-
-		for _, lang := range qs {
-			if str, f := lang["key"].(string); f {
-
-				value := lang["value"].(map[string]interface{})
-
-				for k, v := range value {
-					data := LangData{}
-					data.LangType = str
-					data.Status = k
-					data.Message = v.(string)
-
-					langList = append(langList, data)
-				}
-			}
-
-		}
-
-		input["Data"] = langList
-		input["Count"] = count
-		input["Success"] = success
-		input["Writable"] = writable
-		input["Total"] = total
-		input["Lang"] = lang
-
-		return input
-	}
-	// genInput
-	t, err := template.ParseFiles(TemplatePath + "/lang.tmpl")
+	args := langTemplateInfo{writable: writable, query: make(map[string]interface{})}
+	t, err := template.ParseFiles(templatePath + "/lang.tmpl")
 	if err != nil {
 		fmt.Printf("Error = %v\n", err)
 		panic(err)
@@ -82,14 +83,14 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 			case "status":
 				status = value[0]
 			case "lang":
-				lang = value[0]
+				args.lang = value[0]
 			}
 		}
-		displayLang = lang
-		query["key"] = map[string]interface{}{"$regex": lang}
+
+		args.query["key"] = map[string]interface{}{"$regex": args.lang}
 
 		if active == "del" {
-			err := dbClient.Update(db_name,
+			err := dbClient.Update(dbName,
 				"lang",
 				map[string]interface{}{"key": lang},
 				map[string]interface{}{"$unset": map[string]interface{}{("value." + status): 1}},
@@ -99,16 +100,12 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		input := genInput(displayLang, query, false, writable)
+		input := args.genInput()
 
 		t.Execute(w, input)
 	} else {
 		fmt.Println("================================Lang.POST=================================")
 		r.ParseMultipartForm(0)
-
-		// var ltime string
-		// var mode string
-		var isBatchDone bool
 
 		if _, ok := r.PostForm["bsubmit"]; ok { // Handler uploaded file
 			file, _, opErr := r.FormFile("bf")
@@ -146,12 +143,12 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 						if ok := strings.HasPrefix(lang, "-"); ok {
 
 							if length == 1 {
-								delErr := dbClient.Delete(db_name, "lang", map[string]interface{}{"key": lang[1:]})
+								delErr := dbClient.Delete(dbName, "lang", map[string]interface{}{"key": lang[1:]})
 								if delErr != nil {
 									log.Printf("Error while deleting whole lang : %v, message = %v\n", lang[1:], delErr)
 								}
 							} else {
-								unsetErr := dbClient.Update(db_name,
+								unsetErr := dbClient.Update(dbName,
 									"lang",
 									map[string]interface{}{"key": lang[1:]},
 									map[string]interface{}{"$unset": map[string]interface{}{("value." + status): 1}},
@@ -163,7 +160,7 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 							continue
 						}
 
-						setErr := dbClient.Update(db_name,
+						setErr := dbClient.Update(dbName,
 							"lang",
 							map[string]interface{}{"key": lang},
 							map[string]interface{}{"$set": map[string]interface{}{("value." + status): msg}},
@@ -174,15 +171,15 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				isBatchDone = true
+				args.popDialog = true
 			}
 		} else { // Handle normal operation
-			var lang, status, msg string
+			var status, msg string
 			for key, value := range r.PostForm {
 				fmt.Printf("key = %v, value = %v\n", key, value)
 				switch key {
 				case "lang":
-					lang = value[0]
+					args.lang = value[0]
 				case "status":
 					status = value[0]
 				case "msg":
@@ -193,15 +190,15 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 
 			if _, ok := r.PostForm["search"]; ok { // Search clicked
 
-				if len(lang) > 0 {
-					query["key"] = map[string]interface{}{"$regex": lang}
+				if len(args.lang) > 0 {
+					args.query["key"] = map[string]interface{}{"$regex": args.lang}
 				}
 			} else if _, ok := r.PostForm["save"]; ok { // Save clicked
-				if len(lang) > 0 && len(status) > 0 {
-					query["key"] = lang
-					setErr := dbClient.Update(db_name,
+				if len(args.lang) > 0 && len(status) > 0 {
+					args.query["key"] = args.lang
+					setErr := dbClient.Update(dbName,
 						"lang",
-						map[string]interface{}{"key": lang},
+						map[string]interface{}{"key": args.lang},
 						map[string]interface{}{"$set": map[string]interface{}{("value." + status): msg}},
 						nil)
 
@@ -210,9 +207,8 @@ func LangHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-			displayLang = lang
 		}
-		input := genInput(displayLang, query, isBatchDone, writable)
+		input := args.genInput()
 		t.Execute(w, input)
 	}
 }

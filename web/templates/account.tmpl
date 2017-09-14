@@ -105,9 +105,9 @@
             {{ end }}
         </table>
         <center >
-            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">&lt;&lt;Previous Page</a>{{ end }}
+            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}">&lt;&lt;Previous Page</a>{{ end }}
              { {{.Page}} }
-            {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}{{if .HasNote}}&note={{.Note}}{{end}}">Next Page &gt;&gt;</a>{{ end }}
+            {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}">Next Page &gt;&gt;</a>{{ end }}
         </center>
     <script>
     /* When the user clicks on the button, 

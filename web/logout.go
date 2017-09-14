@@ -12,13 +12,13 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("user = %v\n", user)
 
 	if err == nil {
-		userData := dbClient.ReadOne(db_name, "account", map[string]interface{}{"key": user.Value})
+		userData := dbClient.ReadOne(dbName, "account", map[string]interface{}{"key": user.Value})
 
 		if value, ok := userData["value"]; ok {
 
 			value.(map[string]interface{})["token"] = ""
 			userData["value"] = value
-			dbClient.Write(db_name, "account", userData, nil)
+			dbClient.Write(dbName, "account", userData, nil)
 		}
 	}
 

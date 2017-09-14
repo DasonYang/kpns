@@ -82,7 +82,7 @@
                     {{ if $writable }}
                     <span class="btn-link glyphicon glyphicon-remove-circle" onclick="if(confirm(&quot;確定刪除？&quot;)==true){document.location.href='?id={{.AppId}}&active=del';};"></span>
                     {{ end }}
-                    &nbsp;&nbsp;{{.AppId}}
+                    &nbsp;&nbsp;{{.AppID}}
                 </td>
                 <td >{{.AppKey}}</td>
                 <td >{{.Count}}</td>
@@ -90,5 +90,10 @@
             </tr>
             {{ end }}
         </table>
+        <center >
+            {{ if .HasPre }}<a href="?page={{.Pre}}&limit={{.Limit}}">&lt;&lt;Previous Page</a>{{ end }}
+             { {{.Page}} }
+            {{ if .HasNext }}<a href="?page={{.Next}}&limit={{.Limit}}">Next Page &gt;&gt;</a>{{ end }}
+        </center>
     </body>
 </html>

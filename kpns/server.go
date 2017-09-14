@@ -1,14 +1,11 @@
 package kpns
 
 import (
-    // "github.com/gin-gonic/gin"
+	"encoding/json"
+	"fmt"
+	"net/http"
 
-    // log "github.com/sirupsen/logrus"
-    "fmt"
-    "net/http"
-    "encoding/json" 
-
-    "kpns/web"
+	"kpns/web"
 )
 
 // func kpnsGETHandler(c *gin.Context) {
@@ -77,99 +74,99 @@ import (
 
 func kpnsHandler(w http.ResponseWriter, r *http.Request) {
 
-    var data = make(map[string]interface{})
+	var data = make(map[string]interface{})
 
-    err := r.ParseForm()
-    if err != nil {
-        panic(err)
-    }
+	err := r.ParseForm()
+	if err != nil {
+		panic(err)
+	}
 
-    if r.Method == http.MethodPost {
-        content_type := r.Header["Content-Type"][0]
+	if r.Method == http.MethodPost {
+		contentType := r.Header["Content-Type"][0]
 
-        switch content_type {
-        case "application/json":
-            if r.Body != nil {
-                err = json.NewDecoder(r.Body).Decode(&data)
+		switch contentType {
+		case "application/json":
+			if r.Body != nil {
+				err = json.NewDecoder(r.Body).Decode(&data)
 
-                if err != nil {
-                    panic(err)
-                }
-                defer r.Body.Close()
-            }
-        case "application/x-www-form-urlencoded":
-            query := r.PostForm
-            for k, v := range query {
-                data[k] = v[0]
-            }
-        default:
-            r.ParseMultipartForm(0)
-            fmt.Println("Not support ", r.PostForm)
-        }
-    } else if r.Method == http.MethodGet {
-        query := r.Form
-        for k, v := range query {
-            data[k] = v[0]
-        }
-    }
+				if err != nil {
+					panic(err)
+				}
+				defer r.Body.Close()
+			}
+		case "application/x-www-form-urlencoded":
+			query := r.PostForm
+			for k, v := range query {
+				data[k] = v[0]
+			}
+		default:
+			r.ParseMultipartForm(0)
+			fmt.Println("Not support ", r.PostForm)
+		}
+	} else if r.Method == http.MethodGet {
+		query := r.Form
+		for k, v := range query {
+			data[k] = v[0]
+		}
+	}
 
-    fmt.Printf("Data =  %v\n", data)
-    cmd := data["cmd"]
-    delete(data, "cmd")
+	fmt.Printf("Data =  %v\n", data)
+	cmd := data["cmd"]
+	delete(data, "cmd")
 
-    switch cmd {
-    case "hello":
-        fmt.Fprintln(w, "200 Success")
-    case "event":
-        fallthrough
-    case "raise_event":
-        fmt.Fprintln(w, "200 Success")
-    case "mapping":
-        fallthrough
-    case "reg_mapping":
-        fmt.Fprintln(w, "200 Success")
-    case "rm_mapping":
-        fallthrough
-    case "unreg_mapping":
-        fmt.Fprintln(w, "200 Success")
-    case "client":
-        fallthrough
-    case "reg_client":
-        err := ClientDo(data)
+	switch cmd {
+	case "hello":
+		fmt.Fprintln(w, "200 Success")
+	case "event":
+		fallthrough
+	case "raise_event":
+		fmt.Fprintln(w, "200 Success")
+	case "mapping":
+		fallthrough
+	case "reg_mapping":
+		fmt.Fprintln(w, "200 Success")
+	case "rm_mapping":
+		fallthrough
+	case "unreg_mapping":
+		fmt.Fprintln(w, "200 Success")
+	case "client":
+		fallthrough
+	case "reg_client":
+		err := ClientDo(data)
 
-        if err != nil {
-            panic(err)
-        }
-        fmt.Fprintln(w, "200 Success")
-    case "device":
-        fallthrough
-    case "reg_server":
-        result := DeviceDo(data)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprintln(w, "200 Success")
+	case "device":
+		fallthrough
+	case "reg_server":
+		result := DeviceDo(data)
 
-        // c.String(200, result.Code+ " " +result.Msg)
-        fmt.Fprintln(w, "200 Success ", result)
-    default:
-        fmt.Fprintln(w, "200 Success")
-    }
+		// c.String(200, result.Code+ " " +result.Msg)
+		fmt.Fprintln(w, "200 Success ", result)
+	default:
+		fmt.Fprintln(w, "200 Success")
+	}
 
 }
 
 func RunServer() {
-    err := web.Init(DBClient)
+	err := web.Init(DBClient)
 
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    http.HandleFunc("/tpns", kpnsHandler)
-    http.HandleFunc("/login", web.LoginHandler)
-    http.HandleFunc("/logout", web.LogoutHandler)
-    http.Handle("/allow", web.AuthMiddleware(http.HandlerFunc(web.AllowHandler)))
-    http.Handle("/search", web.AuthMiddleware(http.HandlerFunc(web.SearchHandler)))
-    http.Handle("/appkey", web.AuthMiddleware(http.HandlerFunc(web.AppKeyHandler)))
-    http.Handle("/lang", web.AuthMiddleware(http.HandlerFunc(web.LangHandler)))
-    http.Handle("/account", web.AuthMiddleware(http.HandlerFunc(web.AccountHandler)))
-    http.Handle("/log", web.AuthMiddleware(http.HandlerFunc(web.LogHandler)))
+	http.HandleFunc("/tpns", kpnsHandler)
+	http.HandleFunc("/login", web.LoginHandler)
+	http.HandleFunc("/logout", web.LogoutHandler)
+	http.Handle("/allow", web.AuthMiddleware(http.HandlerFunc(web.AllowHandler)))
+	http.Handle("/search", web.AuthMiddleware(http.HandlerFunc(web.SearchHandler)))
+	http.Handle("/appkey", web.AuthMiddleware(http.HandlerFunc(web.AppKeyHandler)))
+	http.Handle("/lang", web.AuthMiddleware(http.HandlerFunc(web.LangHandler)))
+	http.Handle("/account", web.AuthMiddleware(http.HandlerFunc(web.AccountHandler)))
+	http.Handle("/log", web.AuthMiddleware(http.HandlerFunc(web.LogHandler)))
 
-    http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", nil)
 }
